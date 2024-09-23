@@ -10,7 +10,7 @@ check_code_dist(
   code_type,
   code_domain,
   time = FALSE,
-  domain_tbl = read_codeset("scv_domains", "cccc")
+  domain_tbl = sourceconceptvocabularies::scv_domain_file
 )
 }
 \arguments{

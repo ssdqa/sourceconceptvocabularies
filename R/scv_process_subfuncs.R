@@ -28,14 +28,14 @@ check_code_dist <- function(cohort,
                             code_type,
                             code_domain,
                             time = FALSE,
-                            domain_tbl = read_codeset('scv_domains', 'cccc')){
+                            domain_tbl = sourceconceptvocabularies::scv_domain_file){
 
   cli::cli_div(theme = list(span.code = list(color = 'blue')))
 
   # pick the right domain/columns
   domain_filter <- domain_tbl %>% filter(domain == code_domain)
-  concept_col <- domain_filter$concept_col
-  source_col <- domain_filter$source_col
+  concept_col <- domain_filter$concept_field
+  source_col <- domain_filter$source_field
 
   if(code_type=='source') {
      final_col = source_col
@@ -47,10 +47,10 @@ check_code_dist <- function(cohort,
 
     domain_tbl <- cohort %>%
       inner_join(cdm_tbl(code_domain)) %>%
-      filter(!!sym(domain_filter$date_col) >= start_date,
-             !!sym(domain_filter$date_col) <= end_date) %>%
-      filter(!!sym(domain_filter$date_col) >= time_start,
-             !!sym(domain_filter$date_col) <= time_end)
+      filter(!!sym(domain_filter$date_field) >= start_date,
+             !!sym(domain_filter$date_field) <= end_date) %>%
+      filter(!!sym(domain_filter$date_field) >= time_start,
+             !!sym(domain_filter$date_field) <= time_end)
 
 
     fact_tbl <-
@@ -70,8 +70,8 @@ check_code_dist <- function(cohort,
 
     domain_tbl <- cohort %>%
       inner_join(cdm_tbl(code_domain)) %>%
-      filter(!!sym(domain_filter$date_col) >= start_date,
-             !!sym(domain_filter$date_col) <= end_date)
+      filter(!!sym(domain_filter$date_field) >= start_date,
+             !!sym(domain_filter$date_field) <= end_date)
 
 
     fact_tbl <-

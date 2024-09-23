@@ -7,7 +7,7 @@
 scv_process(
   cohort,
   concept_set,
-  domain_tbl = read_codeset("scv_domains", "cccc"),
+  domain_tbl = sourceconceptvocabularies::scv_domain_file,
   code_type = "source",
   code_domain = "condition_occurrence",
   multi_or_single_site = "single",
@@ -80,6 +80,5 @@ pair for each of the codes provided in @concept_set. this output should then be 
 the \code{scv_output} function to generate an appropriate visualization
 }
 \description{
-add csv output of main table and csv output of param summary
-(that function needs updating to be more generalizable)
+SCV Process function
 }

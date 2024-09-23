@@ -29,6 +29,8 @@
 #'         in some cases, an additional reference table with summary information about the codes
 #'         included in the graph
 #'
+#' @export
+#'
 scv_output <- function(process_output,
                        output_function,
                        code_type,

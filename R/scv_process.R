@@ -1,9 +1,6 @@
 
 #' SCV Process function
 #'
-#' add csv output of main table and csv output of param summary
-#' (that function needs updating to be more generalizable)
-#'
 #' @param cohort A dataframe with the cohort of patients for your study. Should include the columns:
 #'                       - @person_id
 #'                       - @start_date
@@ -56,9 +53,11 @@
 #' @importFrom stringr str_wrap
 #' @importFrom purrr reduce
 #'
+#' @export
+#'
 scv_process <- function(cohort,
                         concept_set,
-                        domain_tbl=read_codeset('scv_domains', 'cccc'),
+                        domain_tbl=sourceconceptvocabularies::scv_domain_file,
                         code_type = 'source',
                         code_domain = 'condition_occurrence',
                         multi_or_single_site = 'single',
