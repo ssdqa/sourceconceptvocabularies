@@ -141,7 +141,7 @@ scv_ss_exp_nt <- function(process_output,
     facet <- facet %>% append('xaxis')
 
     ## ggiraph interactive
-    plot <- final %>% ggplot(aes(x = xaxis, y = as.character(!!sym(map_col)),
+    plt <- final %>% ggplot(aes(x = xaxis, y = as.character(!!sym(map_col)),
                                  fill = !!sym(prop))) +
       geom_tile_interactive(aes(tooltip = tooltip)) +
       geom_text(aes(label = !!sym(prop)), size = 3, color = 'black') +
@@ -154,9 +154,8 @@ scv_ss_exp_nt <- function(process_output,
            x = col,
            y = map_col)
 
-    p <- girafe(ggobj = plot,
-                width_svg = 10,
-                height_svg = 10)
+    plt[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
+                                'tooltip' = TRUE)
 
     # Summary Reference Table
     ref_tbl <- generate_ref_table(tbl = final,
@@ -164,7 +163,7 @@ scv_ss_exp_nt <- function(process_output,
                                   name_col = name_col,
                                   denom = denom)
 
-  output <- list(p, ref_tbl)
+  output <- list(plt, ref_tbl)
 
   return(output)
 }
@@ -351,7 +350,11 @@ scv_ss_anom_nt <- function(process_output,
            shape = guide_legend(title = 'Anomaly'),
            size = 'none')
 
-  girafe(ggobj = plt)
+
+  plt[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
+                              'tooltip' = TRUE)
+
+  return(plt)
 
 }
 
@@ -447,7 +450,10 @@ scv_ms_anom_nt <- function(process_output,
            shape = guide_legend(title = 'Anomaly'),
            size = 'none')
 
-  girafe(ggobj = plt)
+  plt[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
+                              'tooltip' = TRUE)
+
+  return(plt)
 
 }
 
@@ -519,7 +525,8 @@ scv_ss_exp_at <- function(process_output,
       labs(title = paste0('Top ', num_mappings, ' Mapping Pairs Over Time'),
            color = map_col)
 
-    plot <- ggplotly(p)
+    p[["metadata"]] <- tibble('pkg_backend' = 'plotly',
+                              'tooltip' = FALSE)
 
     ref_tbl <- generate_ref_table(tbl = process_output,
                                   id_col = col,
@@ -527,7 +534,7 @@ scv_ss_exp_at <- function(process_output,
                                   denom = denom,
                                   time = TRUE)
 
-  output <- list(plot, ref_tbl)
+  output <- list(p, ref_tbl)
 
   return(output)
 
@@ -608,7 +615,8 @@ scv_ms_exp_at <- function(process_output,
     labs(title = paste0('Top ', num_mappings, ' Mappings for ', filter_concept, ' Over Time'),
          color = 'Site')
 
-  plot <- ggplotly(p)
+  p[["metadata"]] <- tibble('pkg_backend' = 'plotly',
+                            'tooltip' = FALSE)
 
   ref_tbl <- generate_ref_table(tbl = process_output,
                                 id_col = map_col,
@@ -616,7 +624,7 @@ scv_ms_exp_at <- function(process_output,
                                 denom = denom,
                                 time = TRUE)
 
-  output <- list(plot, ref_tbl)
+  output <- list(p, ref_tbl)
 
   return(output)
 
@@ -711,29 +719,36 @@ scv_ms_anom_at <- function(process_output,
     distinct(site, dist_eucl_mean, site_loess) %>%
     group_by(site, dist_eucl_mean) %>%
     summarise(mean_site_loess = mean(site_loess)) %>%
-    ggplot(aes(x = site, y = dist_eucl_mean, fill = mean_site_loess)) +
-    geom_col() +
-    geom_text(aes(label = dist_eucl_mean), vjust = 2, size = 2,
-              show.legend = FALSE) +
-    scale_color_manual(values = c('white', 'black')) +
-    coord_radial(r_axis_inside = FALSE, rotate_angle = TRUE) +
+    mutate(tooltip = paste0('Site: ', site,
+                            '\nEuclidean Distance: ', dist_eucl_mean,
+                            '\nAverage Loess Proportion: ', mean_site_loess)) %>%
+    ggplot(aes(x = site, y = dist_eucl_mean, fill = mean_site_loess, tooltip = tooltip)) +
+    geom_col_interactive() +
+    # geom_text(aes(label = dist_eucl_mean), vjust = 2, size = 3,
+    #           show.legend = FALSE) +
+    coord_radial(r.axis.inside = FALSE, rotate.angle = TRUE) +
     guides(theta = guide_axis_theta(angle = 0)) +
-    #scale_y_continuous(limits = c(-1,ylim_max)) +
     theme_minimal() +
     scale_fill_ssdqa(palette = 'diverging', discrete = FALSE) +
-    theme(legend.position = 'bottom',
-          legend.text = element_text(angle = 45, vjust = 0.9, hjust = 1),
-          axis.text.x = element_text(face = 'bold')) +
+    # theme(legend.position = 'bottom',
+    #       legend.text = element_text(angle = 45, vjust = 0.9, hjust = 1),
+    #       axis.text.x = element_text(face = 'bold')) +
     labs(fill = 'Avg. Proportion \n(Loess)',
          y ='Euclidean Distance',
          x = '',
          title = paste0('Euclidean Distance for ', filter_concept, ' - ', filter_mapped))
 
-  plotly_p <- ggplotly(p,tooltip="text")
-  plotly_q <- ggplotly(q,tooltip="text")
+  p[['metadata']] <- tibble('pkg_backend' = 'plotly',
+                            'tooltip' = TRUE)
 
-  output <- list(plotly_p,
-                 plotly_q,
+  q[['metadata']] <- tibble('pkg_backend' = 'plotly',
+                            'tooltip' = TRUE)
+
+  t[['metadata']] <- tibble('pkg_backend' = 'ggiraph',
+                            'tooltip' = TRUE)
+
+  output <- list(p,
+                 q,
                  t)
 
   return(output)
