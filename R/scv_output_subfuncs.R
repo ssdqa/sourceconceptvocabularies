@@ -819,7 +819,10 @@ scv_ss_anom_at <- function(process_output,
          y = '# of Mappings')+
     theme_minimal()
 
-  output <- ggplotly(new_c)
+  new_c[["metadata"]] <- tibble('pkg_backend' = 'plotly',
+                                'tooltip' = FALSE)
+
+  output <- new_c
 
   }else{
 
@@ -834,5 +837,9 @@ scv_ss_anom_at <- function(process_output,
       layout(title = paste0('Anomalous # of Mappings for ', filter_concept, ' Over Time'))
 
     output <- list(anomalies, decomp)
+
+    cli::cli_inform('This output uses an external package with preset theming - no additional customizations are available.')
   }
+
+  return(output)
 }
