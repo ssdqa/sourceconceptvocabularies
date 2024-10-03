@@ -18,6 +18,7 @@ Imports:
     ggiraph (>= 0.8.9),
     ggplot2 (>= 3.5.0),
     gt (>= 0.11.0),
+    magrittr,
     plotly (>= 4.10.4),
     purrr (>= 1.0.2),
     qicharts2 (>= 0.7.4),
