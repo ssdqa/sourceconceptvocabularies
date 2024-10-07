@@ -878,17 +878,25 @@ scv_ss_anom_at <- function(process_output,
 
     anomalies <-
       plot_anomalies(.data=process_output %>% filter(!!sym(col) == filter_concept),
-                     .date_var=time_start) %>%
-      layout(title = paste0('Anomalous # of Mappings for ', filter_concept, ' Over Time'))
+                     .date_var=time_start,
+                     .interactive = FALSE,
+                     .title = paste0('Anomalous # of Mappings for ', filter_concept, ' Over Time')) #%>%
+      #layout(title = paste0('Anomalous # of Mappings for ', filter_concept, ' Over Time'))
 
     decomp <-
       plot_anomalies_decomp(.data=process_output %>% filter(!!sym(col) == filter_concept),
-                            .date_var=time_start) %>%
-      layout(title = paste0('Anomalous # of Mappings for ', filter_concept, ' Over Time'))
+                            .date_var=time_start,
+                            .interactive = FALSE,
+                            .title = paste0('Anomalous # of Mappings for ', filter_concept, ' Over Time')) #%>%
+      #layout(title = paste0('Anomalous # of Mappings for ', filter_concept, ' Over Time'))
+
+    anomalies[["metadata"]] <- tibble('pkg_backend' = 'plotly',
+                                      'tooltip' = FALSE)
+    decomp[["metadata"]] <- tibble('pkg_backend' = 'plotly',
+                                   'tooltip' = FALSE)
 
     output <- list(anomalies, decomp)
 
-    cli::cli_inform('This output uses an external package with preset theming - no additional customizations are available.')
   }
 
   return(output)
