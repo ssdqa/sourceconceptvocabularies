@@ -328,12 +328,13 @@ scv_ss_anom_nt <- function(process_output,
                       "\nMean proportion:",round(mean_val,2),
                       '\nSD: ', round(sd_val,2),
                       "\nMedian proportion: ",round(median_val,2),
-                      "\nMAD: ", round(mad_val,2)))
+                      "\nMAD: ", round(mad_val,2))) %>%
+    mutate(anomaly_yn = ifelse(anomaly_yn == 'no outlier in group', 'no outlier', anomaly_yn))
 
 
   #mid<-(max(dat_to_plot[[comparison_col]],na.rm=TRUE)+min(dat_to_plot[[comparison_col]],na.rm=TRUE))/2
 
-  plt<-ggplot(dat_to_plot %>% filter(anomaly_yn != 'no outlier in group'),
+  plt<-ggplot(dat_to_plot,
               aes(x=!!sym(col), y=!!sym(map_col), text=text, color=!!sym(comparison_col)))+
     geom_point_interactive(aes(size=mean_val,shape=anomaly_yn, tooltip = text))+
     geom_point_interactive(data = dat_to_plot %>% filter(anomaly_yn == 'not outlier'),
@@ -406,8 +407,7 @@ scv_ms_anom_nt <- function(process_output,
   comparison_col <- prop
 
   nmap_top <- process_output %>%
-    filter(anomaly_yn != 'no outlier in group',
-           !!sym(col) == filter_concept) %>%
+    filter(!!sym(col) == filter_concept) %>%
     select(col, map_col, all_of(facet), prop) %>%
     distinct() %>%
     group_by(!!sym(col), !!!syms(facet)) %>%
@@ -416,6 +416,9 @@ scv_ms_anom_nt <- function(process_output,
 
   final <- process_output %>%
     inner_join(nmap_top)
+
+  check_n <- final %>%
+    filter(anomaly_yn != 'no outlier in group')
 
   dat_to_plot <- final %>%
     mutate(concept_id = as.character(concept_id),
@@ -426,34 +429,81 @@ scv_ms_anom_nt <- function(process_output,
                       "\nMean proportion:",round(mean_val,2),
                       '\nSD: ', round(sd_val,2),
                       "\nMedian proportion: ",round(median_val,2),
-                      "\nMAD: ", round(mad_val,2)))
+                      "\nMAD: ", round(mad_val,2))) %>%
+    mutate(anomaly_yn = ifelse(anomaly_yn == 'no outlier in group', 'not outlier', anomaly_yn))
 
+  title_name <- process_output %>% filter(!!sym(col) == filter_concept) %>%
+    distinct(!!sym(title_col)) %>% pull()
 
-  #mid<-(max(dat_to_plot[[comparison_col]],na.rm=TRUE)+min(dat_to_plot[[comparison_col]],na.rm=TRUE))/2
+  if(nrow(check_n) > 0){
 
-  title_name <- process_output %>% filter(!!sym(col) == filter_concept) %>% distinct(!!sym(title_col)) %>% pull()
+    plt<-ggplot(dat_to_plot,
+                aes(x=site, y=!!sym(map_col), text=text, color=!!sym(comparison_col)))+
+      geom_point_interactive(aes(size=mean_val,shape=anomaly_yn, tooltip = text))+
+      geom_point_interactive(data = dat_to_plot %>% filter(anomaly_yn == 'not outlier'),
+                             aes(size=mean_val,shape=anomaly_yn, tooltip = text), shape = 1, color = 'black')+
+      scale_color_ssdqa(palette = 'diverging', discrete = FALSE) +
+      scale_shape_manual(values=c(19,8))+
+      scale_y_discrete(labels = function(x) str_wrap(x, width = 60)) +
+      theme_minimal() +
+      theme(axis.text.x = element_text(angle=60, hjust = 1)) +
+      labs(size="",
+           title=paste0('Anomalous Mappings for ', filter_concept, ' : ', title_name),
+           subtitle = paste0('From Top ', num_mappings, ' Mappings \nDot size is the mean proportion per mapped concept')) +
+      guides(color = guide_colorbar(title = 'Proportion'),
+             shape = guide_legend(title = 'Anomaly'),
+             size = 'none')
 
-  plt<-ggplot(dat_to_plot %>% filter(anomaly_yn != 'no outlier in group'),
-              aes(x=site, y=!!sym(map_col), text=text, color=!!sym(comparison_col)))+
-    geom_point_interactive(aes(size=mean_val,shape=anomaly_yn, tooltip = text))+
-    geom_point_interactive(data = dat_to_plot %>% filter(anomaly_yn == 'not outlier'),
-                           aes(size=mean_val,shape=anomaly_yn, tooltip = text), shape = 1, color = 'black')+
-    scale_color_ssdqa(palette = 'diverging', discrete = FALSE) +
-    scale_shape_manual(values=c(19,8))+
-    scale_y_discrete(labels = function(x) str_wrap(x, width = 60)) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle=60, hjust = 1)) +
-    labs(size="",
-         title=paste0('Anomalous Mappings for ', filter_concept, ' : ', title_name),
-         subtitle = paste0('From Top ', num_mappings, ' Mappings \nDot size is the mean proportion per mapped concept')) +
-    guides(color = guide_colorbar(title = 'Proportion'),
-           shape = guide_legend(title = 'Anomaly'),
-           size = 'none')
+    plt[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
+                                'tooltip' = TRUE)
 
-  plt[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
-                              'tooltip' = TRUE)
+    return(plt)
 
-  return(plt)
+  }else{
+    plt <- ggplot(dat_to_plot, aes(x = site, y = !!sym(map_col), fill = !!sym(comparison_col),
+                                   tooltip = text)) +
+      geom_tile_interactive() +
+      theme_minimal() +
+      scale_fill_ssdqa(discrete = FALSE, palette = 'diverging') +
+      labs(x = 'Site',
+           title = paste0(filter_concept, ' : ', title_name))
+
+    # Test Site Score using SD Computation
+    test_site_score <- process_output %>%
+      mutate(dist_mean = (!!sym(comparison_col) - mean_val)^2) %>%
+      group_by(site) %>%
+      summarise(n_grp = n(),
+                dist_mean_sum = sum(dist_mean),
+                overall_sd = sqrt(dist_mean_sum / n_grp)) %>%
+      mutate(tooltip = paste0('Site: ', site,
+                              '\nStandard Deviation: ', round(overall_sd, 3)))
+
+    ylim_max <- test_site_score %>% filter(overall_sd == max(overall_sd)) %>% pull(overall_sd) + 1
+    ylim_min <- test_site_score %>% filter(overall_sd == min(overall_sd)) %>% pull(overall_sd) - 1
+
+    g2 <- ggplot(test_site_score, aes(y = overall_sd, x = site, color = site,
+                                      tooltip = tooltip)) +
+      geom_point_interactive(show.legend = FALSE) +
+      theme_minimal() +
+      scale_color_ssdqa() +
+      geom_hline(yintercept = 0, linetype = 'solid') +
+      #geom_hline(yintercept = 1, linetype = 'dotted', color = 'gray', linewidth = 1) +
+      #geom_hline(yintercept = -1, linetype = 'dotted', color = 'gray', linewidth = 1) +
+      #ylim(ylim_min, ylim_max) +
+      labs(title = 'Average Standard Deviation per Site',
+           y = 'Average Standard Deviation',
+           x = 'Site')
+
+    plt[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
+                                'tooltip' = TRUE)
+    g2[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
+                               'tooltip' = TRUE)
+
+    opt <- list(plt,
+                g2)
+
+    return(opt)
+  }
 
 }
 
