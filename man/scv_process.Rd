@@ -7,6 +7,7 @@
 scv_process(
   cohort,
   concept_set,
+  omop_or_pcornet,
   domain_tbl = sourceconceptvocabularies::scv_domain_file,
   code_type = "source",
   code_domain = "condition_occurrence",
@@ -31,6 +32,8 @@ should contain at least a \code{concept_id} column
 
 \if{html}{\out{<div class="sourceCode">}}\preformatted{               for analyses where time = TRUE, a vector with up to 5 source or cdm codes of interest for the analysis.
 }\if{html}{\out{</div>}}}
+
+\item{omop_or_pcornet}{Option to run the function using the OMOP or PCORnet CDM as the default CDM}
 
 \item{domain_tbl}{a csv file that defines the domains where facts should be identified. defaults to the provided
 \code{scv_domains.csv} file, which contains the following fields:

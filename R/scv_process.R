@@ -10,6 +10,7 @@
 #'                    should contain at least a `concept_id` column
 #'
 #'                    for analyses where time = TRUE, a vector with up to 5 source or cdm codes of interest for the analysis.
+#' @param omop_or_pcornet Option to run the function using the OMOP or PCORnet CDM as the default CDM
 #' @param domain_tbl a csv file that defines the domains where facts should be identified. defaults to the provided
 #'                     `scv_domains.csv` file, which contains the following fields:
 #'                     - @domain: the CDM table where information for this domain can be found (i.e. drug_exposure)
@@ -57,6 +58,7 @@
 #'
 scv_process <- function(cohort,
                         concept_set,
+                        omop_or_pcornet,
                         domain_tbl=sourceconceptvocabularies::scv_domain_file,
                         code_type = 'source',
                         code_domain = 'condition_occurrence',
@@ -68,6 +70,13 @@ scv_process <- function(cohort,
                         time_span = c('2012-01-01', '2020-01-01'),
                         time_period = 'year'
 ){
+
+  ## Check proper arguments
+  cli::cli_div(theme = list(span.code = list(color = 'blue')))
+
+  if(!multi_or_single_site %in% c('single', 'multi')){cli::cli_abort('Invalid argument for {.code multi_or_single_site}: please enter either {.code multi} or {.code single}')}
+  if(!anomaly_or_exploratory %in% c('anomaly', 'exploratory')){cli::cli_abort('Invalid argument for {.code anomaly_or_exploratory}: please enter either {.code anomaly} or {.code exploratory}')}
+  if(!tolower(omop_or_pcornet) %in% c('omop', 'pcornet')){cli::cli_abort('Invalid argument for {.code anomaly_or_exploratory}: please enter either {.code omop} or {.code pcornet}')}
 
   ## parameter summary output
   output_type <- suppressWarnings(param_summ(check_string = 'scv',
@@ -92,9 +101,17 @@ scv_process <- function(cohort,
 
   # Prep cohort
 
-  cohort_prep <- prepare_cohort(cohort_tbl = cohort_filter, age_groups = age_groups, codeset = NULL) %>%
-    mutate(domain = code_domain) %>%
-    group_by(!!! syms(grouped_list))
+  if(omop_or_pcornet == 'omop'){
+    cohort_prep <- prepare_cohort(cohort_tbl = cohort_filter,
+                                  age_groups = age_groups, codeset = NULL) %>%
+      mutate(domain = code_domain) %>%
+      group_by(!!! syms(grouped_list))
+  }else{
+    cohort_prep <- prepare_cohort_pcnt(cohort_tbl = cohort_filter,
+                                       age_groups = age_groups, codeset = NULL) %>%
+      mutate(domain = code_domain) %>%
+      group_by(!!! syms(grouped_list))
+  }
 
   # Execute function
   if(! time) {
@@ -108,6 +125,7 @@ scv_process <- function(cohort,
 
       domain_compute <- check_code_dist(cohort = cohort_site,
                                         code_type = code_type,
+                                        omop_or_pcornet = omop_or_pcornet,
                                         code_domain = code_domain,
                                         concept_set = concept_set,
                                         domain_tbl = domain_tbl)
@@ -127,27 +145,29 @@ scv_process <- function(cohort,
 
       if(multi_or_single_site == 'single'){
 
-      scv_tbl_int <- compute_dist_anomalies(df_tbl = scv_tbl %>% replace_site_col(),
-                                            grp_vars = c('domain', var_col),
-                                            var_col = prop_col,
-                                            denom_cols = c(var_col, denom_col))
+        scv_tbl_int <- compute_dist_anomalies(df_tbl = scv_tbl %>% replace_site_col(),
+                                              grp_vars = c('domain', var_col),
+                                              var_col = prop_col,
+                                              denom_cols = c(var_col, denom_col))
 
-      scv_tbl_final <- detect_outliers(df_tbl = scv_tbl_int,
-                                       tail_input = 'both',
-                                       p_input = p_value,
-                                       column_analysis = prop_col,
-                                       column_variable = c('domain', var_col))
+        scv_tbl_final <- detect_outliers(df_tbl = scv_tbl_int,
+                                         tail_input = 'both',
+                                         p_input = p_value,
+                                         column_analysis = prop_col,
+                                         column_variable = c('domain', var_col))
 
-      }else{scv_tbl_int <- compute_dist_anomalies(df_tbl = scv_tbl %>% replace_site_col(),
-                                                  grp_vars = c('domain', 'source_concept_id', 'concept_id'),
-                                                  var_col = prop_col,
-                                                  denom_cols = c(var_col, denom_col))
+      }else{
+        scv_tbl_int <- compute_dist_anomalies(df_tbl = scv_tbl %>% replace_site_col(),
+                                              grp_vars = c('domain', 'source_concept_id', 'concept_id'),
+                                              var_col = prop_col,
+                                              denom_cols = c(var_col, denom_col))
 
-      scv_tbl_final <- detect_outliers(df_tbl = scv_tbl_int,
-                                       tail_input = 'both',
-                                       p_input = p_value,
-                                       column_analysis = prop_col,
-                                       column_variable = c('concept_id', 'source_concept_id')) }
+        scv_tbl_final <- detect_outliers(df_tbl = scv_tbl_int,
+                                         tail_input = 'both',
+                                         p_input = p_value,
+                                         column_analysis = prop_col,
+                                         column_variable = c('concept_id', 'source_concept_id'))
+      }
 
     }else{scv_tbl_final <- scv_tbl}
 
@@ -158,8 +178,13 @@ scv_process <- function(cohort,
                                                               codes from your concept set and include them as
                                                              a vector in the concept_set argument.')}
 
-    concept_set_prep <- as.data.frame(concept_set) %>% rename('concept_id' = concept_set) %>%
-      mutate(concept_id = as.integer(concept_id))
+    if(omop_or_pcornet == 'omop'){
+      concept_set_prep <- as.data.frame(concept_set) %>% rename('concept_id' = concept_set) %>%
+        mutate(concept_id = as.integer(concept_id))
+    }else{
+      concept_set_prep <- as.data.frame(concept_set) %>% rename('concept_code' = concept_set)
+    }
+
     concept_set_prep <- copy_to_new(df = concept_set_prep)
 
     scv_tbl <- compute_fot(cohort = cohort_prep,
@@ -171,6 +196,7 @@ scv_process <- function(cohort,
                            check_func = function(dat){
                              check_code_dist(cohort = dat,
                                              concept_set = concept_set_prep,
+                                             omop_or_pcornet = omop_or_pcornet,
                                              code_type = code_type,
                                              code_domain = code_domain,
                                              domain_tbl = domain_tbl,
@@ -208,12 +234,8 @@ scv_process <- function(cohort,
 
   }
 
-  # scv_tbl_final %>%
-  #   replace_site_col() %>%
-  #   output_tbl('scv_process_results', file = TRUE)
-
-  cli::cli_inform(str_wrap(paste0('Based on your chosen parameters, we recommend using the following
-                                  output function in scv_output: ', output_type, '.')))
+  cli::cli_inform(paste0(col_green('Based on your chosen parameters, we recommend using the following
+                       output function in scv_output: '), col_blue(style_bold(output_type,'.'))))
 
   return(scv_tbl_final %>% replace_site_col())
 }

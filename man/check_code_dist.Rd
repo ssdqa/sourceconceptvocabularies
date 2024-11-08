@@ -10,6 +10,7 @@ check_code_dist(
   code_type,
   code_domain,
   time = FALSE,
+  omop_or_pcornet,
   domain_tbl = sourceconceptvocabularies::scv_domain_file
 )
 }
@@ -28,6 +29,8 @@ should contain at least a \code{concept_id} column
 its associated metadata in the \code{domain_tbl} file}
 
 \item{time}{logical to indicate whether the user would like to examine mappings over time or not}
+
+\item{omop_or_pcornet}{Option to run the function using the OMOP or PCORnet CDM as the default CDM}
 
 \item{domain_tbl}{a table with a list of domains and associated metadata; should include the name
 of the domain, the name of the column where source codes can be found, the name

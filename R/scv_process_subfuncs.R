@@ -11,6 +11,7 @@
 #' @param code_domain the domain related to the codes in the `concept_set`; should match a domain and
 #'                    its associated metadata in the `domain_tbl` file
 #' @param time logical to indicate whether the user would like to examine mappings over time or not
+#' @param omop_or_pcornet Option to run the function using the OMOP or PCORnet CDM as the default CDM
 #' @param domain_tbl a table with a list of domains and associated metadata; should include the name
 #'                   of the domain, the name of the column where source codes can be found, the name
 #'                   of the column where CDM codes can be found, and the date column that should
@@ -28,6 +29,7 @@ check_code_dist <- function(cohort,
                             code_type,
                             code_domain,
                             time = FALSE,
+                            omop_or_pcornet,
                             domain_tbl = sourceconceptvocabularies::scv_domain_file){
 
   cli::cli_div(theme = list(span.code = list(color = 'blue')))
@@ -43,6 +45,17 @@ check_code_dist <- function(cohort,
     final_col = concept_col
   }else{cli::cli_abort(paste0(code_type, ' is not a valid argument. Please select either {.code source} or {.code cdm}'))}
 
+  if(omop_or_pcornet == 'omop'){
+    jc_col <- 'concept_id'
+  }else if(omop_or_pcornet == 'pcornet'){jc_col <- 'concept_code'}
+
+  join_cols <- set_names(jc_col, final_col)
+
+  if(!is.na(domain_filter$vocabulary_field)){
+    join_cols2 <- set_names('vocabulary_id', domain_filter$vocabulary_field)
+    join_cols <- join_cols %>% append(join_cols2)
+  }
+
   if(time){
 
     domain_tbl <- cohort %>%
@@ -56,7 +69,7 @@ check_code_dist <- function(cohort,
     fact_tbl <-
       domain_tbl %>%
       inner_join(concept_set,
-                 by=setNames('concept_id',final_col)) %>%
+                 by=join_cols) %>%
       select(all_of(group_vars(cohort)),
              all_of(concept_col),
              all_of(source_col),
@@ -77,7 +90,7 @@ check_code_dist <- function(cohort,
     fact_tbl <-
       domain_tbl %>%
       inner_join(concept_set,
-                 by=setNames('concept_id',final_col)) %>%
+                 by=join_cols) %>%
       select(all_of(group_vars(cohort)),
              all_of(concept_col),
              all_of(source_col)) %>%
