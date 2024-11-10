@@ -21,8 +21,6 @@
 #'         for each facet group. if time = FALSE, these counts are computed overall. if time = TRUE,
 #'         these counts are computed for each user-specified time increment.
 #'
-#' @importFrom cli cli_div
-#' @importFrom cli cli_abort
 #' @importFrom purrr set_names
 #'
 check_code_dist <- function(cohort,

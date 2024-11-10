@@ -50,6 +50,7 @@
 #' @import dplyr
 #' @import argos
 #' @import ssdqa.gen
+#' @import cli
 #' @importFrom cli cli_inform
 #' @importFrom stringr str_wrap
 #' @importFrom purrr reduce
