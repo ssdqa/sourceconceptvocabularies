@@ -42,13 +42,24 @@ scv_output <- function(process_output,
                        vocab_tbl = vocabulary_tbl('concept')){
 
   if(output_function != 'scv_ss_anom_at'){
+
+    if(class(process_output$concept_id) == 'character'){
+      cid_vocab_join <- 'concept_code'
+    }else{cid_vocab_join <- 'concept_id'}
+
+    if(class(process_output$source_concept_id) == 'character'){
+      scid_vocab_join <- 'concept_code'
+    }else{scid_vocab_join <- 'concept_id'}
+
     rslt_cid <- join_to_vocabulary(tbl = process_output,
                                    vocab_tbl = vocab_tbl,
-                                   col = 'concept_id')
+                                   col = 'concept_id',
+                                   vocab_col = cid_vocab_join)
 
     rslt_scid <- join_to_vocabulary(tbl = process_output,
                                     vocab_tbl = vocab_tbl,
-                                    col = 'source_concept_id') %>%
+                                    col = 'source_concept_id',
+                                    vocab_col = scid_vocab_join) %>%
       rename('source_concept_name' = 'concept_name')
 
     process_output <- process_output %>%
