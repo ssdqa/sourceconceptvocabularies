@@ -23,6 +23,7 @@
 #'
 #' @importFrom cli cli_div
 #' @importFrom cli cli_abort
+#' @importFrom purrr set_names
 #'
 check_code_dist <- function(cohort,
                             concept_set,
@@ -37,7 +38,7 @@ check_code_dist <- function(cohort,
   # pick the right domain/columns
   domain_filter <- domain_tbl %>% filter(domain == code_domain)
   concept_col <- domain_filter$concept_field
-  source_col <- domain_filter$source_field
+  source_col <- domain_filter$source_concept_field
 
   if(code_type=='source') {
      final_col = source_col
