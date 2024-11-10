@@ -173,20 +173,19 @@ scv_process <- function(cohort,
     }else{scv_tbl_final <- scv_tbl}
 
   } else if(time){
-    if(!is.vector(concept_set)){cli::cli_abort('For an over time output, please select 1-5 codes from your
-                                   concept set and include them as a vector in the concept_set argument.')}
-    if(is.vector(concept_set) && length(concept_set) > 5){cli::cli_abort('For an over time output, please select 1-5
-                                                              codes from your concept set and include them as
-                                                             a vector in the concept_set argument.')}
+    # if(!is.vector(concept_set)){cli::cli_abort('For an over time output, please select 1-5 codes from your
+    #                                concept set and include them as a vector in the concept_set argument.')}
+    if(nrow(collect(concept_set)) > 5){cli::cli_abort('For an over time output, please filter your concept set to select 1-5
+                                                        codes of interest')}
 
-    if(omop_or_pcornet == 'omop'){
-      concept_set_prep <- as.data.frame(concept_set) %>% rename('concept_id' = concept_set) %>%
-        mutate(concept_id = as.integer(concept_id))
-    }else{
-      concept_set_prep <- as.data.frame(concept_set) %>% rename('concept_code' = concept_set)
-    }
-
-    concept_set_prep <- copy_to_new(df = concept_set_prep)
+    # if(omop_or_pcornet == 'omop'){
+    #   concept_set_prep <- as.data.frame(concept_set) %>% rename('concept_id' = concept_set) %>%
+    #     mutate(concept_id = as.integer(concept_id))
+    # }else{
+    #   concept_set_prep <- as.data.frame(concept_set) %>% rename('concept_code' = concept_set)
+    # }
+    #
+    # concept_set_prep <- copy_to_new(df = concept_set_prep)
 
     scv_tbl <- compute_fot(cohort = cohort_prep,
                            site_col = site_col,
@@ -196,7 +195,7 @@ scv_process <- function(cohort,
                            reduce_id = NULL,
                            check_func = function(dat){
                              check_code_dist(cohort = dat,
-                                             concept_set = concept_set_prep,
+                                             concept_set = concept_set,
                                              omop_or_pcornet = omop_or_pcornet,
                                              code_type = code_type,
                                              code_domain = code_domain,
