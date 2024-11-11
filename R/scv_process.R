@@ -2,10 +2,10 @@
 #' SCV Process function
 #'
 #' @param cohort A dataframe with the cohort of patients for your study. Should include the columns:
-#'                       - @person_id
-#'                       - @start_date
-#'                       - @end_date
-#'                       - @site
+#' - `person_id`
+#' - `start_date`
+#' - `end_date`
+#' - `site`
 #' @param concept_set for analyses where time = FALSE, a csv file with the source or cdm codes of interest for the analysis.
 #'                    should contain at least a `concept_id` column
 #'
@@ -13,30 +13,29 @@
 #' @param omop_or_pcornet Option to run the function using the OMOP or PCORnet CDM as the default CDM
 #' @param domain_tbl a csv file that defines the domains where facts should be identified. defaults to the provided
 #'                     `scv_domains.csv` file, which contains the following fields:
-#'                     - @domain: the CDM table where information for this domain can be found (i.e. drug_exposure)
-#'                     - @source_col: the column in the CDM table where `source` codes can be identified (i.e. drug_source_concept_id)
-#'                     - @concept_col: the column in the CDM table where `cdm` codes can be identified (i.e. drug_concept_id)
-#'                     - @date_col: the column in the CDM table that should be used as the default date field for
-#'                                  over time analyses (i.e. drug_exposure_start_date)
+#' - `domain`: the CDM table where information for this domain can be found (i.e. drug_exposure)
+#' - `concept_field`: the column in the CDM table where `cdm` codes can be identified (i.e. drug_concept_id or dx)
+#' - `source_concept_field`: the column in the CDM table where `source` codes can be identified (i.e. drug_source_concept_id or raw_dx)
+#' - `date_field`: the column in the CDM table that should be used as the default date field for
+#'over time analyses (i.e. drug_exposure_start_date or dx_date)
+#' - `vocabulary_field`: (PCORnet only) The name of the column in the domain table where the vocabulary type is stored
 #' @param code_type the type of code that is being used in the analysis, either `source` or `cdm`
 #' @param code_domain the domain where the codes in the concept set should be searched for; must match
-#'                    a domain defined in @domain_tbl
+#'                    a domain defined in `domain_tbl`
 #' @param multi_or_single_site Option to run the function on a single vs multiple sites
-#'                               - @single - run the function for a single site
-#'                               - @multi - run the function for multiple sites
+#' - `single` - run the function for a single site
+#' - `multi` - run the function for multiple sites
 #' @param p_value the p value to be used as a threshold in the multi-site anomaly detection analysis
 #' @param anomaly_or_exploratory Option to conduct an exploratory or anomaly detection analysis. Exploratory analyses give a high
 #'                               level summary of the data to examine the fact representation within the cohort. Anomaly detection
 #'                               analyses are specialized to identify outliers within the cohort.
-#' @param age_groups If you would like to stratify the results by age group, fill out the provided `age_group_definitions.csv` file
-#'                     with the following information:
-#'                     - @min_age: the minimum age for the group (i.e. 10)
-#'                     - @max_age: the maximum age for the group (i.e. 20)
-#'                     - @group: a string label for the group (i.e. 10-20, Young Adult, etc.)
+#' @param age_groups If you would like to stratify the results by age group,  create a table or CSV file with the following
+#'                   columns and include it as the `age_groups` function parameter:
+#' - `min_age`: the minimum age for the group (i.e. 10)
+#' - `max_age`: the maximum age for the group (i.e. 20)
+#' - `group`: a string label for the group (i.e. 10-20, Young Adult, etc.)
 #'
-#'                     Then supply this csv file as the age_groups argument (i.e. read.csv('path/to/age_group_definitions.csv'))
-#'
-#'                     If you would not like to stratify by age group, leave the argument as NULL
+#' If you would *not* like to stratify by age group, leave the argument as NULL
 #' @param time a logical that tells the function whether you would like to look at the output over time
 #' @param time_span when time = TRUE, this argument defines the start and end dates for the time period of interest. should be
 #'                  formatted as c(start date, end date) in yyyy-mm-dd date format
@@ -44,7 +43,7 @@
 #'                    to `year`, but other time periods such as `month` or `week` are also acceptable
 #'
 #' @return a dataframe with counts and proportions for each source -> cdm or cdm -> source mapping
-#'         pair for each of the codes provided in @concept_set. this output should then be used in
+#'         pair for each of the codes provided in `concept_set` this output should then be used in
 #'         the `scv_output` function to generate an appropriate visualization
 #'
 #' @import dplyr
@@ -113,6 +112,10 @@ scv_process <- function(cohort,
       mutate(domain = code_domain) %>%
       group_by(!!! syms(grouped_list))
   }
+
+  # Prep concept set for joins
+  concept_set <- concept_set %>% collect()
+  concept_set <- copy_to_new(df = concept_set)
 
   # Execute function
   if(! time) {

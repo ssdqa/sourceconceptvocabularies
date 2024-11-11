@@ -12,7 +12,7 @@
 #' @param filter_concept for `scv_ms_anom_at` only -- choose ONE concept_id from the concept_set provided in
 #'                       `scv_process` to filter the output
 #' @param filter_mapped for `scv_ms_anom_at` only -- choose ONE mapped concept from those associated with the
-#'                      concept_id provided in @filter_concept; options can be found in the `mapped_id` column
+#'                      concept_id provided in `filter_concept`; options can be found in the `mapped_id` column
 #'                      of `scv_process`
 #' @param num_codes the number of top codes of code_type that should be displayed in the analysis
 #'

@@ -34,7 +34,7 @@ faceting variables are provided in the \code{parameter_summary} csv file}
 \code{scv_process} to filter the output}
 
 \item{filter_mapped}{for \code{scv_ms_anom_at} only -- choose ONE mapped concept from those associated with the
-concept_id provided in @filter_concept; options can be found in the \code{mapped_id} column
+concept_id provided in \code{filter_concept}; options can be found in the \code{mapped_id} column
 of \code{scv_process}}
 
 \item{num_codes}{the number of top codes of code_type that should be displayed in the analysis
