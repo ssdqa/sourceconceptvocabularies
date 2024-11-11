@@ -43,11 +43,11 @@ scv_output <- function(process_output,
 
   if(output_function != 'scv_ss_anom_at'){
 
-    if(class(process_output$concept_id) == 'character'){
+    if('character' %in% class(process_output$concept_id)){
       cid_vocab_join <- 'concept_code'
     }else{cid_vocab_join <- 'concept_id'}
 
-    if(class(process_output$source_concept_id) == 'character'){
+    if('character' %in% class(process_output$source_usconcept_id)){
       scid_vocab_join <- 'concept_code'
     }else{scid_vocab_join <- 'concept_id'}
 
