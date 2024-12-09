@@ -1,23 +1,30 @@
 
-#' SCV Process function
+#' Source and Concept Vocabularies
+#'
+#' This is a concept-set testing module that will compute frequency distributions for the usage of either
+#' source-to-concept or concept-to-source concept pairs in order to highlight mapping patterns and impacts
+#' of concept standardization. The user will provide the domain definitions (`domain_tbl`) and a concept
+#' set with the concepts of interest (`concept_set`). Sample versions of these inputs are included as data
+#' in the package and are accessible with `sourceconceptvocabularies::`. Results can optionally be stratified
+#' by site, age group, and/or time. This function is compatible with both the OMOP and the PCORnet CDMs
+#' based on the user's selection.
 #'
 #' @param cohort A dataframe with the cohort of patients for your study. Should include the columns:
 #' - `person_id`
 #' - `start_date`
 #' - `end_date`
 #' - `site`
-#' @param concept_set for analyses where time = FALSE, a csv file with the source or cdm codes of interest for the analysis.
-#'                    should contain at least a `concept_id` column
+#' @param concept_set for analyses where `time = FALSE`, a csv file with the source **OR** cdm codes of interest for the analysis.
 #'
-#'                    for analyses where time = TRUE, a vector with up to 5 source or cdm codes of interest for the analysis.
+#'                    for analyses where `time = TRUE`, a vector with up to 5 source **OR** cdm codes of interest for the analysis.
 #' @param omop_or_pcornet Option to run the function using the OMOP or PCORnet CDM as the default CDM
 #' @param domain_tbl a csv file that defines the domains where facts should be identified. defaults to the provided
-#'                     `scv_domains.csv` file, which contains the following fields:
+#'                     `scv_domain_file`, which contains the following fields:
 #' - `domain`: the CDM table where information for this domain can be found (i.e. drug_exposure)
 #' - `concept_field`: the column in the CDM table where `cdm` codes can be identified (i.e. drug_concept_id or dx)
 #' - `source_concept_field`: the column in the CDM table where `source` codes can be identified (i.e. drug_source_concept_id or raw_dx)
 #' - `date_field`: the column in the CDM table that should be used as the default date field for
-#'over time analyses (i.e. drug_exposure_start_date or dx_date)
+#' over time analyses (i.e. drug_exposure_start_date or dx_date)
 #' - `vocabulary_field`: (PCORnet only) The name of the column in the domain table where the vocabulary type is stored
 #' @param code_type the type of code that is being used in the analysis, either `source` or `cdm`
 #' @param code_domain the domain where the codes in the concept set should be searched for; must match
@@ -54,14 +61,16 @@
 #' @importFrom stringr str_wrap
 #' @importFrom purrr reduce
 #'
+#' @example inst/example-scv_process_output.R
+#'
 #' @export
 #'
 scv_process <- function(cohort,
                         concept_set,
                         omop_or_pcornet,
                         domain_tbl=sourceconceptvocabularies::scv_domain_file,
-                        code_type = 'source',
-                        code_domain = 'condition_occurrence',
+                        code_type,
+                        code_domain,
                         multi_or_single_site = 'single',
                         anomaly_or_exploratory='exploratory',
                         p_value = 0.9,

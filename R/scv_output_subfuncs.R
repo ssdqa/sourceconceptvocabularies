@@ -17,7 +17,7 @@
 #' @importFrom tidyr unite
 NULL
 
-#' Compute number and median mappings per code (SCV)
+#' Compute number and median mappings per code
 #'
 #' @param tbl intermediate table generated in the output function that contains the concepts
 #'            of interest to be used to compute number of mappings
@@ -57,12 +57,11 @@ compute_mappings_per_code <- function(tbl,
 }
 
 
-#' *Single Site, Exploratory, No Time*
+#' *Single Site, Exploratory, Cross-Sectional*
 #'
 #'
 #' @param process_output dataframe output by `scv_process`
-#' @param code_type type of code to be used in analysis -- either `source` or `cdm`
-#'
+#' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
 #' @param facet the variables by which you would like to facet the graph
 #' @param num_codes the number of top codes of code_type that should be displayed in the graph
@@ -75,7 +74,7 @@ compute_mappings_per_code <- function(tbl,
 #'         includes the code and denominator count, and will also include the concept name
 #'         if @vocab_tbl is not NULL
 #'
-scv_ss_exp_nt <- function(process_output,
+scv_ss_exp_cs <- function(process_output,
                           code_type,
                           facet = NULL,
                           num_codes = 10,
@@ -169,11 +168,10 @@ scv_ss_exp_nt <- function(process_output,
 }
 
 
-#' *Multi Site, Exploratory, No Time*
+#' *Multi Site, Exploratory, Cross-Sectional*
 #'
 #' @param process_output dataframe output by `scv_process`
-#' @param code_type type of code to be used in analysis -- either `source` or `cdm`
-#'
+#' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
 #' @param facet the variables by which you would like to facet the graph
 #' @param num_codes the number of top codes of code_type that should be displayed in the graph
@@ -183,7 +181,7 @@ scv_ss_exp_nt <- function(process_output,
 #'         in @num_codes
 #'         concept name will be included if @vocab_tbl is not NULL
 #'
-scv_ms_exp_nt <- function(process_output,
+scv_ms_exp_cs <- function(process_output,
                           code_type,
                           facet = NULL,
                           num_codes = 10){
@@ -242,11 +240,10 @@ scv_ms_exp_nt <- function(process_output,
 }
 
 #'
-#' *Single Site, Anomaly, No Time*
+#' *Single Site, Anomaly, Cross-Sectional*
 #'
 #' @param process_output dataframe output by `scv_process`
-#' @param code_type type of code to be used in analysis -- either `source` or `cdm`
-#'
+#' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
 #' @param facet the variables by which you would like to facet the graph
 #' @param num_codes the number of top codes of code_type that should be displayed in the graph
@@ -257,7 +254,7 @@ scv_ms_exp_nt <- function(process_output,
 #'         for a cdm/source concept pair, and the size of the dot represents the
 #'         mean proportion for the code type along the x axis
 #'
-scv_ss_anom_nt <- function(process_output,
+scv_ss_anom_cs <- function(process_output,
                            code_type,
                            facet = NULL,
                            num_codes = 10,
@@ -360,12 +357,10 @@ scv_ss_anom_nt <- function(process_output,
 }
 
 
-#' *Multi-Site, Anomaly, No Time*
-#'
+#' *Multi-Site, Anomaly, Cross-Sectional*
 #'
 #' @param process_output dataframe output by `scv_process`
-#' @param code_type type of code to be used in analysis -- either `source` or `cdm`
-#'
+#' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
 #' @param facet the variables by which you would like to facet the graph
 #' @param filter_concept the code_type concept_id of interest for which to display its mappings
@@ -376,7 +371,7 @@ scv_ss_anom_nt <- function(process_output,
 #'         of a filter_concept/mapping concept pair, and the size of the dot
 #'         represents the mean proportion across all sites
 #'
-scv_ms_anom_nt <- function(process_output,
+scv_ms_anom_cs <- function(process_output,
                            code_type,
                            facet = NULL,
                            filter_concept,
@@ -508,14 +503,10 @@ scv_ms_anom_nt <- function(process_output,
 }
 
 
-#' *Single Site, Exploratory, Across Time*
+#' *Single Site, Exploratory, Longitudinal*
 #'
-#' Facets by main code (cdm or source) by default, with each line representing
-#' a mapping code. using plotly so the legend is interactive and codes can be isolated
-
 #' @param process_output dataframe output by `scv_process`
-#' @param code_type type of code to be used in analysis -- either `source` or `cdm`
-#'
+#' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
 #' @param num_mappings integer indicating the number of top mappings per code to be
 #'                     displayed in the output
@@ -526,7 +517,7 @@ scv_ms_anom_nt <- function(process_output,
 #' @return a reference table with total counts of each code across the entire user selected
 #'         time period
 #'
-scv_ss_exp_at <- function(process_output,
+scv_ss_exp_la <- function(process_output,
                           code_type,
                           num_mappings = 10,
                           facet = NULL){
@@ -590,15 +581,10 @@ scv_ss_exp_at <- function(process_output,
 
 }
 
-#' *Multi Site, Exploratory, Across Time*
-#'
-#' Facets by main code (cdm or source) by default, with each line representing
-#' a mapping code. using plotly so the legend is interactive and codes can be isolated
-#'
+#' *Multi Site, Exploratory, Longitudinal*
 #'
 #' @param process_output dataframe output by `scv_process`
-#' @param code_type type of code to be used in analysis -- either `source` or `cdm`
-#'
+#' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
 #' @param filter_concept the code_type concept of interest for which mappings should be shown
 #' @param num_mappings an integer indicating the top number of mappings for filter_concept
@@ -610,7 +596,7 @@ scv_ss_exp_at <- function(process_output,
 #' @return a reference table with total counts of each code across the entire user selected
 #'         time period
 #'
-scv_ms_exp_at <- function(process_output,
+scv_ms_exp_la <- function(process_output,
                           code_type,
                           filter_concept,
                           num_mappings = 10,
@@ -680,12 +666,10 @@ scv_ms_exp_at <- function(process_output,
 
 }
 
-#' **Multi-Site Across Time Anomaly**
-#' Produces graphs showing Euclidean Distanctes
+#' **Multi-Site, Anomaly, Longitudinal**
 #'
 #' @param process_output output from `evp_process`
-#' @param code_type type of code to be used in analysis -- either `source` or `cdm`
-#'
+#' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
 #' @param filter_concept the code_type concept of interest to be displayed in the output
 #' @param filter_mapped the mapped concept of interest to be displayed in the output
@@ -699,10 +683,10 @@ scv_ms_exp_at <- function(process_output,
 #'    3) a bar graph with the Euclidean distance value for each site, with the average
 #'    proportion as the fill
 #'
-#' THIS GRAPH SHOWS ONLY ONE VARIABLE AT A TIME!
+#' THIS GRAPH SHOWS ONLY ONE CONCEPT PAIR AT A TIME!
 #'
 
-scv_ms_anom_at <- function(process_output,
+scv_ms_anom_la <- function(process_output,
                            code_type,
                            filter_concept,
                            filter_mapped) {
@@ -805,13 +789,11 @@ scv_ms_anom_at <- function(process_output,
 
 }
 
-#' *Single Site, Anomaly, Across Time*
+#' *Single Site, Anomaly, Longitudinal*
 #'
-#' Control chart looking at number of mappings over time
 #'
 #' @param process_output dataframe output by `scv_process`
-#' @param code_type type of code to be used in analysis -- either `source` or `cdm`
-#'
+#' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
 #' @param filter_concept the code_type concept of interest to be displayed in the output
 #' @param facet the variables by which you would like to facet the graph
@@ -824,7 +806,7 @@ scv_ms_anom_at <- function(process_output,
 #'         conducted and outliers are marked with red dots. the graphs representing
 #'         the data removed in the regression are also returned
 #'
-scv_ss_anom_at <- function(process_output,
+scv_ss_anom_la <- function(process_output,
                            code_type,
                            filter_concept,
                            facet = NULL){

@@ -2,15 +2,15 @@
 % Please edit documentation in R/scv_process.R
 \name{scv_process}
 \alias{scv_process}
-\title{SCV Process function}
+\title{Source and Concept Vocabularies}
 \usage{
 scv_process(
   cohort,
   concept_set,
   omop_or_pcornet,
   domain_tbl = sourceconceptvocabularies::scv_domain_file,
-  code_type = "source",
-  code_domain = "condition_occurrence",
+  code_type,
+  code_domain,
   multi_or_single_site = "single",
   anomaly_or_exploratory = "exploratory",
   p_value = 0.9,
@@ -29,16 +29,15 @@ scv_process(
 \item \code{site}
 }}
 
-\item{concept_set}{for analyses where time = FALSE, a csv file with the source or cdm codes of interest for the analysis.
-should contain at least a \code{concept_id} column
+\item{concept_set}{for analyses where \code{time = FALSE}, a csv file with the source \strong{OR} cdm codes of interest for the analysis.
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{               for analyses where time = TRUE, a vector with up to 5 source or cdm codes of interest for the analysis.
+\if{html}{\out{<div class="sourceCode">}}\preformatted{               for analyses where `time = TRUE`, a vector with up to 5 source **OR** cdm codes of interest for the analysis.
 }\if{html}{\out{</div>}}}
 
 \item{omop_or_pcornet}{Option to run the function using the OMOP or PCORnet CDM as the default CDM}
 
 \item{domain_tbl}{a csv file that defines the domains where facts should be identified. defaults to the provided
-\code{scv_domains.csv} file, which contains the following fields:
+\code{scv_domain_file}, which contains the following fields:
 \itemize{
 \item \code{domain}: the CDM table where information for this domain can be found (i.e. drug_exposure)
 \item \code{concept_field}: the column in the CDM table where \code{cdm} codes can be identified (i.e. drug_concept_id or dx)
@@ -89,5 +88,74 @@ pair for each of the codes provided in \code{concept_set} this output should the
 the \code{scv_output} function to generate an appropriate visualization
 }
 \description{
-SCV Process function
+This is a concept-set testing module that will compute frequency distributions for the usage of either
+source-to-concept or concept-to-source concept pairs in order to highlight mapping patterns and impacts
+of concept standardization. The user will provide the domain definitions (\code{domain_tbl}) and a concept
+set with the concepts of interest (\code{concept_set}). Sample versions of these inputs are included as data
+in the package and are accessible with \verb{sourceconceptvocabularies::}. Results can optionally be stratified
+by site, age group, and/or time. This function is compatible with both the OMOP and the PCORnet CDMs
+based on the user's selection.
+}
+\examples{
+
+#' Source setup file
+source(system.file('setup.R', package = 'sourceconceptvocabularies'))
+
+#' Create in-memory RSQLite database using data in extdata directory
+conn <- mk_testdb_omop()
+
+#' Establish connection to database and generate internal configurations
+initialize_dq_session(session_name = 'csv_process_test',
+                      working_directory = getwd(),
+                      db_conn = conn,
+                      is_json = FALSE,
+                      file_subdirectory = system.file('extdata',
+                                        package = 'sourceconceptvocabularies'),
+                      cdm_schema = NA)
+
+#' Build mock study cohort
+cohort <- cdm_tbl('person') \%>\% dplyr::distinct(person_id) \%>\%
+  dplyr::mutate(start_date = as.Date(-5000),
+                #RSQLite does not store date objects,
+                #hence the numerics
+                end_date = as.Date(15000),
+                site = ifelse(person_id \%in\% c(1:6), 'synth1', 'synth2'))
+
+#' Prepare input tables
+scv_domain_tbl <- dplyr::tibble(domain = 'condition_occurrence',
+                                concept_field = 'condition_concept_id',
+                                source_concept_field =
+                                  'condition_source_concept_id',
+                                date_field = 'condition_start_date',
+                                vocabulary_field = NA)
+
+scv_concept_set <- read_codeset('dx_hypertension')
+
+#' Execute `scv_process` function
+#' This example will use the single site, exploratory, cross sectional
+#' configuration
+scv_process_example <- scv_process(cohort = cohort,
+                                   multi_or_single_site = 'single',
+                                   anomaly_or_exploratory = 'exploratory',
+                                   time = FALSE,
+                                   omop_or_pcornet = 'omop',
+                                   code_type = 'cdm',
+                                   code_domain = 'condition_occurrence',
+                                   domain_tbl = scv_domain_tbl,
+                                   concept_set = scv_concept_set)
+
+scv_process_example
+
+#' Execute `scv_output` function
+scv_output_example <- scv_output(process_output = scv_process_example,
+                                 output_function = 'scv_ss_exp_cs',
+                                 code_type = 'cdm',
+                                 vocab_tbl = NULL)
+
+scv_output_example
+
+#' Easily convert the graph into an interactive ggiraph or plotly object with
+#' `make_interactive_ssdqa()`
+
+make_interactive_ssdqa(scv_output_example)
 }

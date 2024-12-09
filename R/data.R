@@ -6,7 +6,7 @@
 #' and include their own domain definitions.
 #'
 #' @format ## `scv_domain_file`
-#' A data frame with 2 rows and 5 columns
+#' A data frame with 5 columns
 #' \describe{
 #'   \item{domain}{The name of the CDM table associated with the domain where the concept of interest can be found. Should match the domain listed in the concept_set file.}
 #'   \item{concept_field}{The name of the column in the domain table that contains the concepts of interest}

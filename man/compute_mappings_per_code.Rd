@@ -2,7 +2,7 @@
 % Please edit documentation in R/scv_output_subfuncs.R
 \name{compute_mappings_per_code}
 \alias{compute_mappings_per_code}
-\title{Compute number and median mappings per code (SCV)}
+\title{Compute number and median mappings per code}
 \usage{
 compute_mappings_per_code(tbl, col, denom, facet = NULL)
 }
@@ -22,5 +22,5 @@ dataframe that summarizes the overall median number of mappings, group-specific 
 mappings, and how many MAD from the overall median a code falls
 }
 \description{
-Compute number and median mappings per code (SCV)
+Compute number and median mappings per code
 }

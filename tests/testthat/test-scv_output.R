@@ -21,7 +21,7 @@ test_that('single site, exploratory, no time', {
                             source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_exp_nt',
+                             output_function = 'scv_ss_exp_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL))
 
@@ -41,7 +41,7 @@ test_that('multi site, exploratory, no time', {
                             source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ms_exp_nt',
+                             output_function = 'scv_ms_exp_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL))
 
@@ -75,7 +75,7 @@ test_that('single site, anomaly detection, no time', {
                                              'no outlier', 'outlier', 'outlier'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_anom_nt',
+                             output_function = 'scv_ss_anom_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL))
 
@@ -109,13 +109,13 @@ test_that('multi site, anomaly detection, no time', {
                                              'no outlier', 'outlier', 'outlier'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ms_anom_nt',
+                             output_function = 'scv_ms_anom_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
 
   expect_no_error(scv_output(process_output = tbl_test %>% mutate(anomaly_yn == 'no outlier in group'),
-                             output_function = 'scv_ms_anom_nt',
+                             output_function = 'scv_ms_anom_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -142,7 +142,7 @@ test_that('single site, exploratory, across time', {
                             source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_exp_at',
+                             output_function = 'scv_ss_exp_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -168,7 +168,7 @@ test_that('multi site, exploratory, across time', {
                             source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ms_exp_at',
+                             output_function = 'scv_ms_exp_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -195,7 +195,7 @@ test_that('single site, anomaly detection, across time -- year', {
                             source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_anom_at',
+                             output_function = 'scv_ss_anom_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -230,7 +230,7 @@ test_that('single site, anomaly detection, across time -- month', {
                                                  0.46, 0.57, 0.69, 0.82, 0.88))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_anom_at',
+                             output_function = 'scv_ss_anom_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -255,7 +255,7 @@ test_that('multi site, anomaly detection, across time', {
                             'dist_eucl_mean' = c(0.84,0.84,0.84,0.84,0.84,0.9,0.9,0.9,0.9))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ms_anom_at',
+                             output_function = 'scv_ms_anom_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1,

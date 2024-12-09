@@ -1,0 +1,12 @@
+
+utils::globalVariables(c('site', 'site_loess', 'person_id', 'patid',
+                       'concept_id', 'source_concept_id', 'concept_name',
+                       'source_concept_name', 'start_date', 'end_date',
+                       'time_start', 'time_increment', 'anomaly_yn', 'cl',
+                       'ucl', 'lcl', 'x', 'y', 'xaxis', 'time_end', 'q1', 'q3',
+                       'cname', 'ct', 'denom_concept_ct', 'denom_source_ct',
+                       'dist_eucl_mean', 'dist_mean', 'dist_mean_sum', 'dist_median',
+                       'domain', 'facet_col', 'mad_val', 'mean_allsiteprop',
+                       'mean_site_loess', 'mean_val', 'median_val', 'n_grp',
+                       'n_mappings', 'nmap', 'overall_sd', 'prop_col', 'sd_val',
+                       'text_raw', 'text_smooth', 'tooltip'))

@@ -8,6 +8,7 @@ test_that('only single & multi are allowed inputs', {
                     'end_date' = c('2011-01-01','2009-01-01'))
 
   expect_error(scv_process(cohort = cht,
+                           code_type = 'cdm',
                            multi_or_single_site = 'test',
                            anomaly_or_exploratory = 'exploratory',
                            omop_or_pcornet = 'omop'))
@@ -22,6 +23,7 @@ test_that('only anomaly & exploratory are allowed inputs', {
                     'end_date' = c('2011-01-01','2009-01-01'))
 
   expect_error(scv_process(cohort = cht,
+                           code_type = 'cdm',
                            multi_or_single_site = 'single',
                            anomaly_or_exploratory = 'test',
                            omop_or_pcornet = 'omop'))
@@ -35,6 +37,7 @@ test_that('only omop & pcornet are allowed inputs', {
                     'end_date' = c('2011-01-01','2009-01-01'))
 
   expect_error(scv_process(cohort = cht,
+                           code_type = 'cdm',
                            multi_or_single_site = 'single',
                            anomaly_or_exploratory = 'exploratory',
                            omop_or_pcornet = 'test'))
@@ -71,6 +74,7 @@ test_that('scv exp nt -- omop', {
   expect_no_error(scv_process(cohort = cohort,
                               concept_set = load_codeset('dx_hypertension'),
                               domain_tbl = scv_file,
+                              code_type = 'cdm',
                               omop_or_pcornet = 'omop',
                               multi_or_single_site = 'single',
                               anomaly_or_exploratory = 'exploratory',
@@ -106,6 +110,7 @@ test_that('scv ss anom nt -- omop', {
   expect_warning(expect_warning(scv_process(cohort = cohort,
                               concept_set = load_codeset('dx_hypertension'),
                               domain_tbl = scv_file,
+                              code_type = 'cdm',
                               omop_or_pcornet = 'omop',
                               multi_or_single_site = 'single',
                               anomaly_or_exploratory = 'anomaly',
@@ -142,6 +147,7 @@ test_that('scv ms anom nt -- omop', {
   expect_warning(scv_process(cohort = cohort,
                               concept_set = load_codeset('dx_hypertension'),
                               domain_tbl = scv_file,
+                              code_type = 'cdm',
                               omop_or_pcornet = 'omop',
                               multi_or_single_site = 'multi',
                               anomaly_or_exploratory = 'anomaly',
@@ -179,6 +185,7 @@ test_that('scv exp at -- omop', {
                               concept_set = load_codeset('dx_hypertension') %>%
                                 filter(concept_id == 132685),
                               domain_tbl = scv_file,
+                              code_type = 'cdm',
                               omop_or_pcornet = 'omop',
                               multi_or_single_site = 'single',
                               anomaly_or_exploratory = 'exploratory',
@@ -191,6 +198,7 @@ test_that('scv exp at -- omop', {
                             concept_set = load_codeset('dx_hypertension'),
                             domain_tbl = scv_file,
                             omop_or_pcornet = 'omop',
+                            code_type = 'cdm',
                             multi_or_single_site = 'single',
                             anomaly_or_exploratory = 'exploratory',
                             code_domain = 'condition_occurrence',
@@ -229,6 +237,7 @@ test_that('scv ss anom at -- omop', {
                               concept_set = load_codeset('dx_hypertension') %>%
                                 filter(concept_id == 132685),
                               domain_tbl = scv_file,
+                              code_type = 'cdm',
                               omop_or_pcornet = 'omop',
                               multi_or_single_site = 'single',
                               anomaly_or_exploratory = 'anomaly',
@@ -268,6 +277,7 @@ test_that('scv ms anom at -- omop', {
   expect_error(scv_process(cohort = cohort,
                               concept_set = load_codeset('dx_hypertension') %>%
                                 filter(concept_id == 132685),
+                              code_type = 'cdm',
                               domain_tbl = scv_file,
                               omop_or_pcornet = 'omop',
                               multi_or_single_site = 'multi',
