@@ -51,7 +51,7 @@ scv_output <- function(process_output,
       cid_vocab_join <- 'concept_code'
     }else{cid_vocab_join <- 'concept_id'}
 
-    if('character' %in% class(process_output$source_usconcept_id)){
+    if('character' %in% class(process_output$source_concept_id)){
       scid_vocab_join <- 'concept_code'
     }else{scid_vocab_join <- 'concept_id'}
 

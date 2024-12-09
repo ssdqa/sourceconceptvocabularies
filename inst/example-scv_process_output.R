@@ -58,4 +58,4 @@ scv_output_example
 #' Easily convert the graph into an interactive ggiraph or plotly object with
 #' `make_interactive_ssdqa()`
 
-make_interactive_ssdqa(scv_output_example)
+make_interactive_ssdqa(scv_output_example[[1]])
