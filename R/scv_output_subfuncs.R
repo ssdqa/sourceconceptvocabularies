@@ -326,7 +326,7 @@ scv_ss_anom_cs <- function(process_output,
                       '\nSD: ', round(sd_val,2),
                       "\nMedian proportion: ",round(median_val,2),
                       "\nMAD: ", round(mad_val,2))) %>%
-    mutate(anomaly_yn = ifelse(anomaly_yn == 'no outlier in group', 'no outlier', anomaly_yn))
+    mutate(anomaly_yn = ifelse(anomaly_yn == 'no outlier in group', 'not outlier', anomaly_yn))
 
 
   #mid<-(max(dat_to_plot[[comparison_col]],na.rm=TRUE)+min(dat_to_plot[[comparison_col]],na.rm=TRUE))/2
