@@ -287,7 +287,7 @@ scv_ss_anom_cs <- function(process_output,
   comparison_col <- prop
 
   topcodes <- process_output %>%
-    filter(anomaly_yn != 'no outlier in group') %>%
+    #filter(anomaly_yn != 'no outlier in group') %>%
     ungroup() %>%
     select(col, denom, all_of(facet)) %>%
     distinct() %>%
