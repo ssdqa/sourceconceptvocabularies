@@ -122,12 +122,12 @@ scv_process <- function(cohort,
       group_by(!!! syms(grouped_list))
   }
 
-  # Prep concept set for joins
-  concept_set <- concept_set %>% collect()
-  concept_set <- copy_to_new(df = concept_set)
-
   # Execute function
   if(! time) {
+
+    # Prep concept set for joins
+    concept_set <- concept_set %>% collect()
+    concept_set <- copy_to_new(df = concept_set)
 
     for(k in 1:length(site_list_adj)) {
 
