@@ -187,7 +187,7 @@ scv_process <- function(cohort,
   } else if(time){
     # if(!is.vector(concept_set)){cli::cli_abort('For an over time output, please select 1-5 codes from your
     #                                concept set and include them as a vector in the concept_set argument.')}
-    if(nrow(collect(concept_set)) > 5){cli::cli_abort('For an over time output, please filter your concept set to select 1-5
+    if(length(concept_set) > 5){cli::cli_abort('For an over time output, please filter your concept set to select 1-5
                                                         codes of interest')}
 
     # if(omop_or_pcornet == 'omop'){
