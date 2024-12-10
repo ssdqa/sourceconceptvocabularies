@@ -182,7 +182,8 @@ test_that('scv exp at -- omop', {
                      vocabulary_field = c(NA))
 
   expect_no_error(scv_process(cohort = cohort,
-                              concept_set = c('132685'),
+                              concept_set = load_codeset('dx_hypertension') %>%
+                                filter(concept_id == 132685),
                               domain_tbl = scv_file,
                               code_type = 'cdm',
                               omop_or_pcornet = 'omop',

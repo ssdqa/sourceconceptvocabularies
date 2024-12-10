@@ -67,9 +67,8 @@ check_code_dist <- function(cohort,
 
     fact_tbl <-
       domain_tbl %>%
-      filter(!!sym(final_col) %in% concept_set) %>%
-      # inner_join(concept_set,
-      #            by=join_cols) %>%
+      inner_join(concept_set,
+                 by=join_cols) %>%
       select(all_of(group_vars(cohort)),
              all_of(concept_col),
              all_of(source_col),

@@ -654,7 +654,7 @@ scv_ms_exp_la <- function(process_output,
   p[["metadata"]] <- tibble('pkg_backend' = 'plotly',
                             'tooltip' = FALSE)
 
-  ref_tbl <- generate_ref_table(tbl = process_output,
+  ref_tbl <- generate_ref_table(tbl = process_output %>% ungroup(),
                                 id_col = map_col,
                                 name_col = map_name,
                                 denom = denom,
