@@ -819,7 +819,8 @@ scv_ss_anom_la <- function(process_output,
     col <- 'concept_id'
   }else{cli::cli_abort('Please choose a valid code_type: {.code source} or {.code cdm}')}
 
-  time_inc <- process_output %>% distinct(time_increment) %>% pull()
+  time_inc <- process_output %>% filter(!is.na(time_increment)) %>%
+    distinct(time_increment) %>% pull()
 
   facet <- facet %>% append(col)
 
