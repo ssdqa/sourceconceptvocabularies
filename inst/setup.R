@@ -12,12 +12,12 @@ mk_testdb_omop <- function(){
     'person' = 'iiiiiTiiiiiccicici',
     'visit_occurrence' = 'iiiDTDTiiiciicici')
   for (file_name in list.files(path=system.file('extdata',
-                                                package = 'patientfacts'),
+                                                package = 'sourceconceptvocabularies'),
                                pattern = "\\.csv$")) {
     # Get table_name from csv file_name without extension
     table_name <- sub('\\.csv$', '', file_name)
     tbl <- readr::read_csv(
-      file = file.path(system.file('extdata', package = 'patientfacts'),
+      file = file.path(system.file('extdata', package = 'sourceconceptvocabularies'),
                        file_name),
       col_types = col_type_mapping[[table_name]],
       show_col_types = FALSE
