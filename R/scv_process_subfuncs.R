@@ -105,7 +105,7 @@ check_code_dist <- function(cohort,
       source_concept_id,
       .add = TRUE
     ) %>% summarise(ct=n()) %>%
-    compute_new()
+    collect()
 
 
   denom_concepts <-
@@ -114,7 +114,7 @@ check_code_dist <- function(cohort,
       concept_id,
       .add = TRUE
     ) %>% summarise(denom_concept_ct=n()) %>%
-    compute_new()
+    collect()
 
   denom_source <-
     fact_tbl %>%
@@ -122,11 +122,11 @@ check_code_dist <- function(cohort,
       source_concept_id,
       .add = TRUE
     ) %>% summarise(denom_source_ct=n()) %>%
-  compute_new()
+  collect()
 
   grouped_output_totals <-
     grouped_output %>% left_join(denom_concepts) %>%
-    left_join(denom_source) %>% collect() %>%
+    left_join(denom_source) %>% #collect() %>%
     mutate(concept_prop = round(ct/denom_concept_ct, 2),
            source_prop = round(ct/denom_source_ct,2))
 
