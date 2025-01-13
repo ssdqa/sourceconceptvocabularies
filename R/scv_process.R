@@ -109,18 +109,11 @@ scv_process <- function(cohort,
   site_output <- list()
 
   # Prep cohort
-
-  if(omop_or_pcornet == 'omop'){
     cohort_prep <- prepare_cohort(cohort_tbl = cohort_filter,
-                                  age_groups = age_groups, codeset = NULL) %>%
+                                  age_groups = age_groups, codeset = NULL,
+                                  omop_or_pcornet = omop_or_pcornet) %>%
       mutate(domain = code_domain) %>%
       group_by(!!! syms(grouped_list))
-  }else{
-    cohort_prep <- prepare_cohort_pcnt(cohort_tbl = cohort_filter,
-                                       age_groups = age_groups, codeset = NULL) %>%
-      mutate(domain = code_domain) %>%
-      group_by(!!! syms(grouped_list))
-  }
 
   # Execute function
   if(! time) {
