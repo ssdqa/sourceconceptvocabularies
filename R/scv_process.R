@@ -227,7 +227,7 @@ scv_process <- function(cohort,
         group_by(!!sym(var_col), time_start, time_increment) %>%
         summarise(n_mappings = n())
 
-      scv_tbl_final <- anomalize_ss_anom_at(fot_input_tbl = n_mappings_time,
+      scv_tbl_final <- anomalize_ss_anom_la(fot_input_tbl = n_mappings_time,
                                             time_var = 'time_start',
                                             grp_vars = var_col,
                                             var_col = 'n_mappings')
