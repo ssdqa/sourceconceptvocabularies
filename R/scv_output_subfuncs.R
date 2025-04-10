@@ -144,7 +144,7 @@ scv_ss_exp_cs <- function(process_output,
                                  fill = !!sym(prop))) +
       geom_tile_interactive(aes(tooltip = tooltip)) +
       geom_text(aes(label = !!sym(prop)), size = 3, color = 'black') +
-      scale_fill_ssdqa(palette = 'diverging', discrete = FALSE) +
+      scale_fill_squba(palette = 'diverging', discrete = FALSE) +
       facet_wrap((facet), scales = 'free') +
       theme_minimal() +
       theme(axis.text.x = element_blank(),
@@ -230,7 +230,7 @@ scv_ms_exp_cs <- function(process_output,
       #gtExtras::gt_plt_bar_pct(column = pct) %>%
       fmt_number(columns = ct, decimals = 0) %>%
       fmt_percent(columns = prop, decimals = 0) %>%
-      data_color(palette = ssdqa_colors_standard, columns = c(all_of(facet))) %>%
+      data_color(palette = squba_colors_standard, columns = c(all_of(facet))) %>%
       tab_header(title = paste0('All Available Mappings for Top ', num_codes, ' Codes')) %>%
       opt_interactive(use_search = TRUE,
                       use_filters = TRUE)
@@ -336,7 +336,7 @@ scv_ss_anom_cs <- function(process_output,
     geom_point_interactive(aes(size=mean_val,shape=anomaly_yn, tooltip = text))+
     geom_point_interactive(data = dat_to_plot %>% filter(anomaly_yn == 'not outlier'),
                            aes(size=mean_val,shape=anomaly_yn, tooltip = text), shape = 1, color = 'black')+
-    scale_color_ssdqa(palette = 'diverging', discrete = FALSE) +
+    scale_color_squba(palette = 'diverging', discrete = FALSE) +
     scale_shape_manual(values=c(19,8))+
     scale_y_discrete(labels = function(x) str_wrap(x, width = 60)) +
     theme_minimal() +
@@ -437,7 +437,7 @@ scv_ms_anom_cs <- function(process_output,
       geom_point_interactive(aes(size=mean_val,shape=anomaly_yn, tooltip = text))+
       geom_point_interactive(data = dat_to_plot %>% filter(anomaly_yn == 'not outlier'),
                              aes(size=mean_val,shape=anomaly_yn, tooltip = text), shape = 1, color = 'black')+
-      scale_color_ssdqa(palette = 'diverging', discrete = FALSE) +
+      scale_color_squba(palette = 'diverging', discrete = FALSE) +
       scale_shape_manual(values=c(19,8))+
       scale_y_discrete(labels = function(x) str_wrap(x, width = 60)) +
       theme_minimal() +
@@ -459,7 +459,7 @@ scv_ms_anom_cs <- function(process_output,
                                    tooltip = text)) +
       geom_tile_interactive() +
       theme_minimal() +
-      scale_fill_ssdqa(discrete = FALSE, palette = 'diverging') +
+      scale_fill_squba(discrete = FALSE, palette = 'diverging') +
       labs(x = 'Site',
            title = paste0(filter_concept, ' : ', title_name))
 
@@ -480,7 +480,7 @@ scv_ms_anom_cs <- function(process_output,
                                       tooltip = tooltip)) +
       geom_point_interactive(show.legend = FALSE) +
       theme_minimal() +
-      scale_color_ssdqa() +
+      scale_color_squba() +
       geom_hline(yintercept = 0, linetype = 'solid') +
       #geom_hline(yintercept = 1, linetype = 'dotted', color = 'gray', linewidth = 1) +
       #geom_hline(yintercept = -1, linetype = 'dotted', color = 'gray', linewidth = 1) +
@@ -560,7 +560,7 @@ scv_ss_exp_la <- function(process_output,
                  label2 = ct
                  )) +
       geom_line() +
-      scale_color_ssdqa() +
+      scale_color_squba() +
       facet_wrap((facet)) +
       theme_minimal() +
       labs(title = paste0('Top ', num_mappings, ' Mapping Pairs Over Time'),
@@ -645,7 +645,7 @@ scv_ms_exp_la <- function(process_output,
                label2 = ct
     )) +
     geom_line() +
-    scale_color_ssdqa() +
+    scale_color_squba() +
     facet_wrap((facet)) +
     theme_minimal() +
     labs(title = paste0('Top ', num_mappings, ' Mappings for ', filter_concept, ' Over Time'),
@@ -730,7 +730,7 @@ scv_ms_anom_la <- function(process_output,
     ggplot(aes(y = prop_col, x = time_start, color = site, group = site, text = text_smooth)) +
     geom_line(data=allsites, linewidth=1.1) +
     geom_smooth(se=TRUE,alpha=0.1,linewidth=0.5, formula = y ~ x) +
-    scale_color_ssdqa() +
+    scale_color_squba() +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 30, vjust = 1, hjust=1)) +
     labs(y = 'Proportion (Loess)',
@@ -742,7 +742,7 @@ scv_ms_anom_la <- function(process_output,
                group=site, text=text_raw)) +
     geom_line(data=allsites,linewidth=1.1) +
     geom_line(linewidth=0.2) +
-    scale_color_ssdqa() +
+    scale_color_squba() +
     theme_minimal() +
     theme(axis.text.x = element_text(angle = 30, vjust = 1, hjust=1)) +
     labs(x = 'Time',
@@ -763,7 +763,7 @@ scv_ms_anom_la <- function(process_output,
     coord_radial(r.axis.inside = FALSE, rotate.angle = TRUE) +
     guides(theta = guide_axis_theta(angle = 0)) +
     theme_minimal() +
-    scale_fill_ssdqa(palette = 'diverging', discrete = FALSE) +
+    scale_fill_squba(palette = 'diverging', discrete = FALSE) +
     # theme(legend.position = 'bottom',
     #       legend.text = element_text(angle = 45, vjust = 0.9, hjust = 1),
     #       axis.text.x = element_text(face = 'bold')) +
@@ -840,11 +840,11 @@ scv_ss_anom_la <- function(process_output,
 
   new_c <- ggplot(op_dat,aes(x,y)) +
     geom_ribbon(aes(ymin = lcl,ymax = ucl), fill = "lightgray",alpha = 0.4) +
-    geom_line(colour = ssdqa_colors_standard[[12]], size = .5) +
+    geom_line(colour = squba_colors_standard[[12]], size = .5) +
     geom_line(aes(x,cl)) +
-    geom_point(colour = ssdqa_colors_standard[[6]] , fill = ssdqa_colors_standard[[6]], size = 1) +
-    geom_point(data = subset(op_dat, y >= ucl), color = ssdqa_colors_standard[[3]], size = 2) +
-    geom_point(data = subset(op_dat, y <= lcl), color = ssdqa_colors_standard[[3]], size = 2) +
+    geom_point(colour = squba_colors_standard[[6]] , fill = squba_colors_standard[[6]], size = 1) +
+    geom_point(data = subset(op_dat, y >= ucl), color = squba_colors_standard[[3]], size = 2) +
+    geom_point(data = subset(op_dat, y <= lcl), color = squba_colors_standard[[3]], size = 2) +
     facet_wrap(~facet1) +
     theme_minimal() +
     ggtitle(label = 'Control Chart: Number of Mappings per Code') +

@@ -155,7 +155,7 @@ scv_output_example <- scv_output(process_output = scv_process_example,
 scv_output_example
 
 #' Easily convert the graph into an interactive ggiraph or plotly object with
-#' `make_interactive_ssdqa()`
+#' `make_interactive_squba()`
 
-make_interactive_ssdqa(scv_output_example[[1]])
+make_interactive_squba(scv_output_example[[1]])
 }

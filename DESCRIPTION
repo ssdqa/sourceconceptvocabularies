@@ -10,7 +10,7 @@ Authors@R:
              comment = c(ORCID = "0000-0001-9523-056X")),
       person("Charles", "Bailey", email = "baileyc@chop.edu", role = c("aut"),
              comment = c(ORCID = "0000-0002-8967-0662")))
-Description: The Source and Concept Vocabularies module, part of the larger SSDQA ecosystem, 
+Description: The Source and Concept Vocabularies module, part of the larger SQUBA ecosystem, 
     identifies the relationships between source codes and standard concept codes to evaluate the
     usage patterns of each source-to-concept or concept-to-source pairing. In order to take advantage
     of this module, both source fields and standard concept fields must be available in the data.
@@ -23,7 +23,7 @@ BugReports: https://github.com/ssdqa/sourceconceptvocabularies/issues
 Depends: 
     argos,
     R (>= 2.10),
-    ssdqa.gen
+    squba.gen
 Imports: 
     cli (>= 3.6.3),
     dplyr (>= 1.1.4),
@@ -38,7 +38,7 @@ Imports:
     stringr (>= 1.5.1),
     tidyr (>= 1.3.1),
     timetk (>= 2.9.0)
-Remotes: PEDSnet/argos, ssdqa/ssdqa.gen
+Remotes: PEDSnet/argos, ssdqa/squba.gen
 LazyData: true
 Suggests: 
     DBI,
