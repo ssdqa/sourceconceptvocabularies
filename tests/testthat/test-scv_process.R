@@ -118,6 +118,44 @@ test_that('scv ss anom nt -- omop', {
 })
 
 
+test_that('scv ss anom nt jaccard -- omop', {
+
+  rlang::is_installed("DBI")
+  rlang::is_installed("readr")
+  rlang::is_installed('RSQLite')
+
+  conn <- mk_testdb_omop()
+
+  initialize_dq_session(session_name = 'scv_process_test',
+                        working_directory = getwd(),
+                        db_conn = conn,
+                        is_json = FALSE,
+                        file_subdirectory = 'testspecs',
+                        cdm_schema = NA)
+
+  cohort <- cdm_tbl('person') %>% distinct(person_id) %>%
+    mutate(start_date = as.Date(-5000),
+           end_date = as.Date(15000),
+           site = ifelse(person_id %in% c(1:6), 'synth1', 'synth2'))
+
+  scv_file <- tibble(domain = c('condition_occurrence'),
+                     concept_field = c('condition_concept_id'),
+                     date_field = c('condition_start_date'),
+                     source_concept_field = c('condition_source_concept_id'),
+                     vocabulary_field = c(NA))
+
+  expect_no_error(scv_process(cohort = cohort,
+                              concept_set = load_codeset('dx_hypertension'),
+                              domain_tbl = scv_file,
+                              jaccard_index = TRUE,
+                              code_type = 'cdm',
+                              omop_or_pcornet = 'omop',
+                              multi_or_single_site = 'single',
+                              anomaly_or_exploratory = 'anomaly',
+                              code_domain = 'condition_occurrence'))
+})
+
+
 test_that('scv ms anom nt -- omop', {
 
   rlang::is_installed("DBI")

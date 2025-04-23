@@ -11,6 +11,7 @@ scv_process(
   domain_tbl = sourceconceptvocabularies::scv_domain_file,
   code_type,
   code_domain,
+  jaccard_index = FALSE,
   multi_or_single_site = "single",
   anomaly_or_exploratory = "exploratory",
   p_value = 0.9,
@@ -51,6 +52,10 @@ over time analyses (i.e. drug_exposure_start_date or dx_date)
 
 \item{code_domain}{the domain where the codes in the concept set should be searched for; must match
 a domain defined in \code{domain_tbl}}
+
+\item{jaccard_index}{\strong{FOR \code{scv_ss_anom_cs} ONLY}: a boolean indicating whether a jaccard index
+should be computed at the visit level to determine how often two mapped concepts
+cooccur; can help identify potential post-coordination for SNOMED concepts}
 
 \item{multi_or_single_site}{Option to run the function on a single vs multiple sites
 \itemize{

@@ -47,29 +47,56 @@ scv_output <- function(process_output,
 
   if(output_function != 'scv_ss_anom_la'){
 
-    if('character' %in% class(process_output$concept_id)){
-      cid_vocab_join <- 'concept_code'
-    }else{cid_vocab_join <- 'concept_id'}
+   if(output_function == 'scv_ss_anom_cs' && !is.null(filter_concept)){
 
-    if('character' %in% class(process_output$source_concept_id)){
-      scid_vocab_join <- 'concept_code'
-    }else{scid_vocab_join <- 'concept_id'}
+     if('character' %in% class(process_output$concept1)){
+       cid1_vocab_join <- 'concept_code'
+     }else{cid1_vocab_join <- 'concept_id'}
 
-    rslt_cid <- join_to_vocabulary(tbl = process_output,
-                                   vocab_tbl = vocab_tbl,
-                                   col = 'concept_id',
-                                   vocab_col = cid_vocab_join)
+     if('character' %in% class(process_output$concept2)){
+       cid2_vocab_join <- 'concept_code'
+     }else{cid2_vocab_join <- 'concept_id'}
 
-    rslt_scid <- join_to_vocabulary(tbl = process_output,
-                                    vocab_tbl = vocab_tbl,
-                                    col = 'source_concept_id',
-                                    vocab_col = scid_vocab_join) %>%
-      rename('source_concept_name' = 'concept_name')
+      rslt_cid <- join_to_vocabulary(tbl = process_output,
+                                     vocab_tbl = vocab_tbl,
+                                     col = 'concept1',
+                                     vocab_col = cid1_vocab_join) %>%
+        rename('concept1_name' = 'concept_name')
+
+      rslt_scid <- join_to_vocabulary(tbl = process_output,
+                                      vocab_tbl = vocab_tbl,
+                                      col = 'concept2',
+                                      vocab_col = cid2_vocab_join) %>%
+        rename('concept2_name' = 'concept_name')
+
+      process_output <- process_output %>%
+        left_join(rslt_cid %>% distinct(concept1, concept1_name)) %>%
+        left_join(rslt_scid %>% distinct(concept2, concept2_name))
+    }else{
+
+      if('character' %in% class(process_output$concept_id)){
+        cid_vocab_join <- 'concept_code'
+      }else{cid_vocab_join <- 'concept_id'}
+
+      if('character' %in% class(process_output$source_concept_id)){
+        scid_vocab_join <- 'concept_code'
+      }else{scid_vocab_join <- 'concept_id'}
+
+      rslt_cid <- join_to_vocabulary(tbl = process_output,
+                                     vocab_tbl = vocab_tbl,
+                                     col = 'concept_id',
+                                     vocab_col = cid_vocab_join)
+
+      rslt_scid <- join_to_vocabulary(tbl = process_output,
+                                      vocab_tbl = vocab_tbl,
+                                      col = 'source_concept_id',
+                                      vocab_col = scid_vocab_join) %>%
+        rename('source_concept_name' = 'concept_name')
 
     process_output <- process_output %>%
       left_join(rslt_cid %>% distinct(concept_id, concept_name)) %>%
       left_join(rslt_scid %>% distinct(source_concept_id, source_concept_name))
-
+    }
   }else{
     process_output <- process_output
   }
@@ -88,6 +115,7 @@ scv_output <- function(process_output,
   }else if(output_function == 'scv_ss_anom_cs'){
     scv_output <- scv_ss_anom_cs(process_output = process_output,
                                  code_type = code_type,
+                                 filter_concept = filter_concept,
                                  facet = facet,
                                  num_codes = num_codes,
                                  num_mappings = num_mappings)

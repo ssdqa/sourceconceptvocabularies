@@ -9,4 +9,7 @@ utils::globalVariables(c('site', 'site_loess', 'person_id', 'patid',
                        'domain', 'facet_col', 'mad_val', 'mean_allsiteprop',
                        'mean_site_loess', 'mean_val', 'median_val', 'n_grp',
                        'n_mappings', 'nmap', 'overall_sd', 'prop_col', 'sd_val',
-                       'text_raw', 'text_smooth', 'tooltip'))
+                       'text_raw', 'text_smooth', 'tooltip', 'concept1', 'concept2',
+                       'cocount', 'concept1_ct', 'concept2_ct', 'concept1_name',
+                       'concept2_name', 'concept_count_union', 'jaccard_index',
+                       'primary_col', 'var_visit_ct', 'visit_id'))

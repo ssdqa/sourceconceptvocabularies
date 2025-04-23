@@ -15,6 +15,7 @@
 #' @importFrom utils head
 #' @importFrom graphics text
 #' @importFrom tidyr unite
+#' @importFrom rlang :=
 NULL
 
 #' Compute number and median mappings per code
@@ -245,6 +246,8 @@ scv_ms_exp_cs <- function(process_output,
 #' @param process_output dataframe output by `scv_process`
 #' @param code_type type of code to be used in analysis -- either `source` or `cdm`;
 #'                  should match the code_type provided when running `scv_process`
+#' @param filter_concept For instances when the jaccard_index analysis was executed,
+#'                       the code_type concept_id of interest for which to display its mappings
 #' @param facet the variables by which you would like to facet the graph
 #' @param num_codes the number of top codes of code_type that should be displayed in the graph
 #' @param num_mappings the number of top mappings that should be displayed for each code
@@ -257,6 +260,7 @@ scv_ms_exp_cs <- function(process_output,
 scv_ss_anom_cs <- function(process_output,
                            code_type,
                            facet = NULL,
+                           filter_concept = NULL,
                            num_codes = 10,
                            num_mappings = 15){
 
@@ -276,81 +280,110 @@ scv_ss_anom_cs <- function(process_output,
     name_col <- 'concept_name'
   }else{cli::cli_abort('Please select a valid code_type: {.code source} or {.code cdm}')}
 
-  cname_samp <- process_output %>% head(1) %>% select(concept_name) %>% pull()
+  if('jaccard_index' %in% colnames(process_output)){
 
-  if(cname_samp == 'No vocabulary table input'){
-    concept_label <- 'concept_id'
-    source_concept_label <- 'source_concept_id'
-  }else{concept_label <- 'concept_name'
-        source_concept_label <- 'source_concept_name'}
+      tbl_grph <- process_output %>%
+        rename('primary_col' := !!sym(col)) %>%
+        filter(primary_col == filter_concept) %>%
+        mutate(tooltip = paste0('Site: ', site,
+                                '\nConcept 1: ', concept1_name,
+                                '\nConcept 2: ', concept2_name,
+                                '\nJaccard Index: ', jaccard_index))
 
-  comparison_col <- prop
+      plt <- tbl_grph %>%
+        ggplot(aes(x = as.character(concept1), y = as.character(concept2),
+                   fill = jaccard_index, tooltip = tooltip)) +
+        geom_tile_interactive() +
+        scale_fill_squba(discrete = FALSE, palette = 'diverging',
+                         limits = c(0,1)) +
+        theme_minimal() +
+        labs(title = paste0('Co-Occurrence of ', filter_concept, ' Mappings in Same Visit'),
+             x = 'Concept 1',
+             y = 'Concept 2',
+             fill = 'Jaccard Index')
 
-  topcodes <- process_output %>%
-    #filter(anomaly_yn != 'no outlier in group') %>%
-    ungroup() %>%
-    select(col, denom, all_of(facet)) %>%
-    distinct() %>%
-    group_by(!!! syms(facet)) %>%
-    arrange(desc(!! sym(denom))) %>%
-    slice(1:num_codes)
-
-  ref <- process_output %>%
-    ungroup() %>%
-    inner_join(topcodes) %>%
-    distinct()
-
-  nmap_total <- ref %>%
-    group_by(!!sym(col), !!!syms(facet)) %>%
-    summarise(nmap = n())
-
-  nmap_top <- ref %>%
-    select(col, map_col, all_of(facet), prop) %>%
-    distinct() %>%
-    group_by(!!sym(col), !!!syms(facet)) %>%
-    arrange(desc(!!sym(prop))) %>%
-    slice(1:num_mappings)
-
-  final <- ref %>%
-    inner_join(nmap_top) %>%
-    left_join(nmap_total)
-
-  dat_to_plot <- final %>%
-    mutate(concept_id = as.character(concept_id),
-           source_concept_id = as.character(source_concept_id)) %>%
-    mutate(text=paste("Concept: ", !!sym(concept_label),
-                      "\nSource Concept: ", !!sym(source_concept_label),
-                      "\nSite: ",site,
-                      "\nProportion: ",round(!!sym(comparison_col),2),
-                      "\nMean proportion:",round(mean_val,2),
-                      '\nSD: ', round(sd_val,2),
-                      "\nMedian proportion: ",round(median_val,2),
-                      "\nMAD: ", round(mad_val,2))) %>%
-    mutate(anomaly_yn = ifelse(anomaly_yn == 'no outlier in group', 'not outlier', anomaly_yn))
+      plt[['metadata']] <- tibble('pkg_backend' = 'ggiraph',
+                                   'tooltip' = TRUE)
 
 
-  #mid<-(max(dat_to_plot[[comparison_col]],na.rm=TRUE)+min(dat_to_plot[[comparison_col]],na.rm=TRUE))/2
+  }else{
 
-  plt<-ggplot(dat_to_plot,
-              aes(x=!!sym(col), y=!!sym(map_col), text=text, color=!!sym(comparison_col)))+
-    geom_point_interactive(aes(size=mean_val,shape=anomaly_yn, tooltip = text))+
-    geom_point_interactive(data = dat_to_plot %>% filter(anomaly_yn == 'not outlier'),
-                           aes(size=mean_val,shape=anomaly_yn, tooltip = text), shape = 1, color = 'black')+
-    scale_color_squba(palette = 'diverging', discrete = FALSE) +
-    scale_shape_manual(values=c(19,8))+
-    scale_y_discrete(labels = function(x) str_wrap(x, width = 60)) +
-    theme_minimal() +
-    theme(axis.text.x = element_text(angle=60, hjust = 1)) +
-    labs(size="",
-         title=paste0('Anomalous Concept Pairs'),
-         subtitle = paste0('For Top ', num_codes, ' Codes and Top ', num_mappings, ' Mappings \nDot size is the mean proportion')) +
-    guides(color = guide_colorbar(title = 'Proportion'),
-           shape = guide_legend(title = 'Anomaly'),
-           size = 'none')
+    cname_samp <- process_output %>% head(1) %>% select(concept_name) %>% pull()
+
+    if(cname_samp == 'No vocabulary table input'){
+      concept_label <- 'concept_id'
+      source_concept_label <- 'source_concept_id'
+    }else{concept_label <- 'concept_name'
+          source_concept_label <- 'source_concept_name'}
+
+    comparison_col <- prop
+
+    topcodes <- process_output %>%
+      #filter(anomaly_yn != 'no outlier in group') %>%
+      ungroup() %>%
+      select(col, denom, all_of(facet)) %>%
+      distinct() %>%
+      group_by(!!! syms(facet)) %>%
+      arrange(desc(!! sym(denom))) %>%
+      slice(1:num_codes)
+
+    ref <- process_output %>%
+      ungroup() %>%
+      inner_join(topcodes) %>%
+      distinct()
+
+    nmap_total <- ref %>%
+      group_by(!!sym(col), !!!syms(facet)) %>%
+      summarise(nmap = n())
+
+    nmap_top <- ref %>%
+      select(col, map_col, all_of(facet), prop) %>%
+      distinct() %>%
+      group_by(!!sym(col), !!!syms(facet)) %>%
+      arrange(desc(!!sym(prop))) %>%
+      slice(1:num_mappings)
+
+    final <- ref %>%
+      inner_join(nmap_top) %>%
+      left_join(nmap_total)
+
+    dat_to_plot <- final %>%
+      mutate(concept_id = as.character(concept_id),
+             source_concept_id = as.character(source_concept_id)) %>%
+      mutate(text=paste("Concept: ", !!sym(concept_label),
+                        "\nSource Concept: ", !!sym(source_concept_label),
+                        "\nSite: ",site,
+                        "\nProportion: ",round(!!sym(comparison_col),2),
+                        "\nMean proportion:",round(mean_val,2),
+                        '\nSD: ', round(sd_val,2),
+                        "\nMedian proportion: ",round(median_val,2),
+                        "\nMAD: ", round(mad_val,2))) %>%
+      mutate(anomaly_yn = ifelse(anomaly_yn == 'no outlier in group', 'not outlier', anomaly_yn))
 
 
-  plt[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
-                              'tooltip' = TRUE)
+    #mid<-(max(dat_to_plot[[comparison_col]],na.rm=TRUE)+min(dat_to_plot[[comparison_col]],na.rm=TRUE))/2
+
+    plt<-ggplot(dat_to_plot,
+                aes(x=!!sym(col), y=!!sym(map_col), text=text, color=!!sym(comparison_col)))+
+      geom_point_interactive(aes(size=mean_val,shape=anomaly_yn, tooltip = text))+
+      geom_point_interactive(data = dat_to_plot %>% filter(anomaly_yn == 'not outlier'),
+                             aes(size=mean_val,shape=anomaly_yn, tooltip = text), shape = 1, color = 'black')+
+      scale_color_squba(palette = 'diverging', discrete = FALSE) +
+      scale_shape_manual(values=c(19,8))+
+      scale_y_discrete(labels = function(x) str_wrap(x, width = 60)) +
+      theme_minimal() +
+      # theme(axis.text.x = element_text(angle=60, hjust = 1)) +
+      labs(size="",
+           title=paste0('Anomalous Concept Pairs'),
+           subtitle = paste0('For Top ', num_codes, ' Codes and Top ', num_mappings, ' Mappings \nDot size is the mean proportion')) +
+      guides(color = guide_colorbar(title = 'Proportion'),
+             shape = guide_legend(title = 'Anomaly'),
+             size = 'none')
+
+
+    plt[["metadata"]] <- tibble('pkg_backend' = 'ggiraph',
+                                'tooltip' = TRUE)
+  }
 
   return(plt)
 

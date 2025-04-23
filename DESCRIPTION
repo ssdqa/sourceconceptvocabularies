@@ -34,6 +34,7 @@ Imports:
     plotly (>= 4.10.4),
     purrr (>= 1.0.2),
     qicharts2 (>= 0.7.4),
+    rlang (>= 1.1.5),
     stats (>= 4.4.0),
     stringr (>= 1.5.1),
     tidyr (>= 1.3.1),
@@ -43,7 +44,6 @@ LazyData: true
 Suggests: 
     DBI,
     readr,
-    rlang,
     RSQLite,
     testthat (>= 3.0.0)
 Config/testthat/edition: 3

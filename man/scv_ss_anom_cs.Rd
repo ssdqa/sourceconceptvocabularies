@@ -8,6 +8,7 @@ scv_ss_anom_cs(
   process_output,
   code_type,
   facet = NULL,
+  filter_concept = NULL,
   num_codes = 10,
   num_mappings = 15
 )
@@ -19,6 +20,9 @@ scv_ss_anom_cs(
 should match the code_type provided when running \code{scv_process}}
 
 \item{facet}{the variables by which you would like to facet the graph}
+
+\item{filter_concept}{For instances when the jaccard_index analysis was executed,
+the code_type concept_id of interest for which to display its mappings}
 
 \item{num_codes}{the number of top codes of code_type that should be displayed in the graph}
 

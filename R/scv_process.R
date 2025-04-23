@@ -29,6 +29,9 @@
 #' @param code_type the type of code that is being used in the analysis, either `source` or `cdm`
 #' @param code_domain the domain where the codes in the concept set should be searched for; must match
 #'                    a domain defined in `domain_tbl`
+#' @param jaccard_index **FOR `scv_ss_anom_cs` ONLY**: a boolean indicating whether a jaccard index
+#'                      should be computed at the visit level to determine how often two mapped concepts
+#'                      cooccur; can help identify potential post-coordination for SNOMED concepts
 #' @param multi_or_single_site Option to run the function on a single vs multiple sites
 #' - `single` - run the function for a single site
 #' - `multi` - run the function for multiple sites
@@ -71,6 +74,7 @@ scv_process <- function(cohort,
                         domain_tbl=sourceconceptvocabularies::scv_domain_file,
                         code_type,
                         code_domain,
+                        jaccard_index = FALSE,
                         multi_or_single_site = 'single',
                         anomaly_or_exploratory='exploratory',
                         p_value = 0.9,
@@ -115,121 +119,138 @@ scv_process <- function(cohort,
       mutate(domain = code_domain) %>%
       group_by(!!! syms(grouped_list))
 
-  # Execute function
-  if(! time) {
+  if(jaccard_index == TRUE && multi_or_single_site == 'single' &&
+       anomaly_or_exploratory == 'anomaly' && time == FALSE){
 
     # Prep concept set for joins
     concept_set <- concept_set %>% collect()
     concept_set <- copy_to_new(df = concept_set)
 
-    for(k in 1:length(site_list_adj)) {
+    scv_tbl_final <- compute_jaccard_scv(cohort = cohort_prep,
+                                         domain_tbl = domain_tbl,
+                                         concept_set = concept_set,
+                                         code_type = code_type,
+                                         code_domain = code_domain,
+                                         omop_or_pcornet = omop_or_pcornet)
 
-      site_list_thisrnd <- site_list_adj[[k]]
+  }else{
 
-      # filters by site
-      cohort_site <- cohort_prep %>% filter(!!sym(site_col)%in%c(site_list_thisrnd))
+    # Execute function
+    if(! time) {
 
-      domain_compute <- check_code_dist(cohort = cohort_site,
-                                        code_type = code_type,
-                                        omop_or_pcornet = omop_or_pcornet,
-                                        code_domain = code_domain,
-                                        concept_set = concept_set,
-                                        domain_tbl = domain_tbl)
+      # Prep concept set for joins
+      concept_set <- concept_set %>% collect()
+      concept_set <- copy_to_new(df = concept_set)
 
-      site_output[[k]] <- domain_compute
+      for(k in 1:length(site_list_adj)) {
+
+        site_list_thisrnd <- site_list_adj[[k]]
+
+        # filters by site
+        cohort_site <- cohort_prep %>% filter(!!sym(site_col)%in%c(site_list_thisrnd))
+
+        domain_compute <- check_code_dist(cohort = cohort_site,
+                                          code_type = code_type,
+                                          omop_or_pcornet = omop_or_pcornet,
+                                          code_domain = code_domain,
+                                          concept_set = concept_set,
+                                          domain_tbl = domain_tbl)
+
+        site_output[[k]] <- domain_compute
+
+      }
+
+      scv_tbl <- reduce(.x=site_output,
+                        .f=dplyr::union)
+
+      if(anomaly_or_exploratory == 'anomaly'){
+
+        prop_col <- ifelse(code_type == 'cdm', 'concept_prop', 'source_prop')
+        var_col <-  ifelse(code_type == 'cdm', 'concept_id', 'source_concept_id')
+        denom_col <- ifelse(code_type == 'cdm', 'denom_concept_ct', 'denom_source_ct')
+
+        if(multi_or_single_site == 'single'){
+
+          scv_tbl_int <- compute_dist_anomalies(df_tbl = scv_tbl %>% replace_site_col(),
+                                                grp_vars = c('domain', var_col),
+                                                var_col = prop_col,
+                                                denom_cols = c(var_col, denom_col))
+
+          scv_tbl_final <- detect_outliers(df_tbl = scv_tbl_int,
+                                           tail_input = 'both',
+                                           p_input = p_value,
+                                           column_analysis = prop_col,
+                                           column_variable = c('domain', var_col))
+
+        }else{
+          scv_tbl_int <- compute_dist_anomalies(df_tbl = scv_tbl %>% replace_site_col(),
+                                                grp_vars = c('domain', 'source_concept_id', 'concept_id'),
+                                                var_col = prop_col,
+                                                denom_cols = c(var_col, denom_col))
+
+          scv_tbl_final <- detect_outliers(df_tbl = scv_tbl_int,
+                                           tail_input = 'both',
+                                           p_input = p_value,
+                                           column_analysis = prop_col,
+                                           column_variable = c('concept_id', 'source_concept_id'))
+        }
+
+      }else{scv_tbl_final <- scv_tbl}
+
+    } else if(time){
+
+      if(nrow(collect(concept_set)) > 5){cli::cli_abort('For an over time output, please filter your concept set to select 1-5
+                                                          codes of interest')}
+
+      concept_set <- concept_set %>% collect()
+      concept_set <- copy_to_new(df = concept_set)
+
+      scv_tbl <- compute_fot(cohort = cohort_prep,
+                             site_col = site_col,
+                             site_list = site_list_adj,
+                             time_span = time_span,
+                             time_period = time_period,
+                             reduce_id = NULL,
+                             check_func = function(dat){
+                               check_code_dist(cohort = dat,
+                                               concept_set = concept_set,
+                                               omop_or_pcornet = omop_or_pcornet,
+                                               code_type = code_type,
+                                               code_domain = code_domain,
+                                               domain_tbl = domain_tbl,
+                                               time = TRUE)
+                             })
+
+      if(multi_or_single_site == 'multi' && anomaly_or_exploratory == 'anomaly'){
+
+        var_col <- ifelse(code_type == 'cdm', 'concept_prop', 'source_prop')
+
+        scv_tbl_final <- ms_anom_euclidean(fot_input_tbl = scv_tbl,
+                                           grp_vars = c('site', 'concept_id', 'source_concept_id'),
+                                           var_col = var_col)
+
+      }else if(multi_or_single_site == 'single' && anomaly_or_exploratory == 'anomaly'){
+
+        var_col <- ifelse(code_type == 'cdm', 'concept_id', 'source_concept_id')
+        time_inc <- scv_tbl %>% ungroup() %>% distinct(time_increment) %>% pull()
+
+        if(time_inc != 'year'){
+
+        n_mappings_time <- scv_tbl %>%
+          group_by(!!sym(var_col), time_start, time_increment) %>%
+          summarise(n_mappings = n())
+
+        scv_tbl_final <- anomalize_ss_anom_la(fot_input_tbl = n_mappings_time,
+                                              time_var = 'time_start',
+                                              grp_vars = var_col,
+                                              var_col = 'n_mappings')
+        }else{
+          scv_tbl_final <- scv_tbl
+        }
+
+      }else{(scv_tbl_final <- scv_tbl)}
 
     }
-
-    scv_tbl <- reduce(.x=site_output,
-                      .f=dplyr::union)
-
-    if(anomaly_or_exploratory == 'anomaly'){
-
-      prop_col <- ifelse(code_type == 'cdm', 'concept_prop', 'source_prop')
-      var_col <-  ifelse(code_type == 'cdm', 'concept_id', 'source_concept_id')
-      denom_col <- ifelse(code_type == 'cdm', 'denom_concept_ct', 'denom_source_ct')
-
-      if(multi_or_single_site == 'single'){
-
-        scv_tbl_int <- compute_dist_anomalies(df_tbl = scv_tbl %>% replace_site_col(),
-                                              grp_vars = c('domain', var_col),
-                                              var_col = prop_col,
-                                              denom_cols = c(var_col, denom_col))
-
-        scv_tbl_final <- detect_outliers(df_tbl = scv_tbl_int,
-                                         tail_input = 'both',
-                                         p_input = p_value,
-                                         column_analysis = prop_col,
-                                         column_variable = c('domain', var_col))
-
-      }else{
-        scv_tbl_int <- compute_dist_anomalies(df_tbl = scv_tbl %>% replace_site_col(),
-                                              grp_vars = c('domain', 'source_concept_id', 'concept_id'),
-                                              var_col = prop_col,
-                                              denom_cols = c(var_col, denom_col))
-
-        scv_tbl_final <- detect_outliers(df_tbl = scv_tbl_int,
-                                         tail_input = 'both',
-                                         p_input = p_value,
-                                         column_analysis = prop_col,
-                                         column_variable = c('concept_id', 'source_concept_id'))
-      }
-
-    }else{scv_tbl_final <- scv_tbl}
-
-  } else if(time){
-
-    if(nrow(collect(concept_set)) > 5){cli::cli_abort('For an over time output, please filter your concept set to select 1-5
-                                                        codes of interest')}
-
-    concept_set <- concept_set %>% collect()
-    concept_set <- copy_to_new(df = concept_set)
-
-    scv_tbl <- compute_fot(cohort = cohort_prep,
-                           site_col = site_col,
-                           site_list = site_list_adj,
-                           time_span = time_span,
-                           time_period = time_period,
-                           reduce_id = NULL,
-                           check_func = function(dat){
-                             check_code_dist(cohort = dat,
-                                             concept_set = concept_set,
-                                             omop_or_pcornet = omop_or_pcornet,
-                                             code_type = code_type,
-                                             code_domain = code_domain,
-                                             domain_tbl = domain_tbl,
-                                             time = TRUE)
-                           })
-
-    if(multi_or_single_site == 'multi' && anomaly_or_exploratory == 'anomaly'){
-
-      var_col <- ifelse(code_type == 'cdm', 'concept_prop', 'source_prop')
-
-      scv_tbl_final <- ms_anom_euclidean(fot_input_tbl = scv_tbl,
-                                         grp_vars = c('site', 'concept_id', 'source_concept_id'),
-                                         var_col = var_col)
-
-    }else if(multi_or_single_site == 'single' && anomaly_or_exploratory == 'anomaly'){
-
-      var_col <- ifelse(code_type == 'cdm', 'concept_id', 'source_concept_id')
-      time_inc <- scv_tbl %>% ungroup() %>% distinct(time_increment) %>% pull()
-
-      if(time_inc != 'year'){
-
-      n_mappings_time <- scv_tbl %>%
-        group_by(!!sym(var_col), time_start, time_increment) %>%
-        summarise(n_mappings = n())
-
-      scv_tbl_final <- anomalize_ss_anom_la(fot_input_tbl = n_mappings_time,
-                                            time_var = 'time_start',
-                                            grp_vars = var_col,
-                                            var_col = 'n_mappings')
-      }else{
-        scv_tbl_final <- scv_tbl
-      }
-
-    }else{(scv_tbl_final <- scv_tbl)}
-
   }
 
   cli::cli_inform(paste0(col_green('Based on your chosen parameters, we recommend using the following

@@ -82,6 +82,27 @@ test_that('single site, anomaly detection, no time', {
 })
 
 
+test_that('single site, anomaly detection, no time jaccard', {
+
+  tbl_test <- tidyr::tibble(site = c('a', 'a', 'a', 'a', 'a', 'a'),
+                            domain = c('dx','dx','dx','dx','dx','dx'),
+                            concept1 = c(2,3,4,5,6,7),
+                            concept2 = c(3,4,5,3,7,2),
+                            concept_id = c(1,1,1,1,1,1),
+                            cocount = c(15, 20, 25, 30, 35, 40),
+                            concept1_ct = c(10,15,20,25,30,35),
+                            concept2_ct = c(15,20,25,25,35,10),
+                            jaccard_index = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6))
+
+  expect_no_error(scv_output(process_output = tbl_test,
+                             output_function = 'scv_ss_anom_cs',
+                             filter_concept = 1,
+                             code_type = 'cdm',
+                             vocab_tbl = NULL))
+
+})
+
+
 test_that('multi site, anomaly detection, no time', {
 
   tbl_test <- tidyr::tibble(site = c('a', 'a', 'a', 'b', 'b', 'b'),
