@@ -152,6 +152,7 @@ test_that('scv ss anom nt jaccard -- omop', {
                               omop_or_pcornet = 'omop',
                               multi_or_single_site = 'single',
                               anomaly_or_exploratory = 'anomaly',
+                              time = FALSE,
                               code_domain = 'condition_occurrence'))
 })
 

@@ -133,6 +133,11 @@ scv_process <- function(cohort,
                                          code_domain = code_domain,
                                          omop_or_pcornet = omop_or_pcornet)
 
+    site_nm <- cohort_prep %>% ungroup() %>% collect() %>%
+      distinct(!!sym(site_col)) %>% pull()
+
+    scv_tbl_final <- scv_tbl_final %>% mutate(site = site_nm)
+
   }else{
 
     # Execute function
