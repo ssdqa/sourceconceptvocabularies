@@ -9,47 +9,47 @@
 #' by site, age group, and/or time. This function is compatible with both the OMOP and the PCORnet CDMs
 #' based on the user's selection.
 #'
-#' @param cohort A dataframe with the cohort of patients for your study. Should include the columns:
-#' - `person_id`
-#' - `start_date`
-#' - `end_date`
-#' - `site`
-#' @param concept_set for analyses where `time = FALSE`, a csv file with the source **OR** cdm codes of interest for the analysis.
+#' @param cohort *tabular input* | A dataframe with the cohort of patients for your study. Should include the columns:
+#' - `person_id` / `patid` | *integer* / *character*
+#' - `start_date` | *date*
+#' - `end_date` | *date*
+#' - `site` | *site*
+#' @param concept_set *tabular input* | for analyses where `time = FALSE`, a csv file with the source **OR** cdm codes of interest for the analysis.
 #'
-#'                    for analyses where `time = TRUE`, a vector with up to 5 source **OR** cdm codes of interest for the analysis.
-#' @param omop_or_pcornet Option to run the function using the OMOP or PCORnet CDM as the default CDM
-#' @param domain_tbl a csv file that defines the domains where facts should be identified. defaults to the provided
+#'                    *vector* | for analyses where `time = TRUE`, a vector with up to 5 source **OR** cdm codes of interest for the analysis.
+#' @param omop_or_pcornet *string* | Option to run the function using the OMOP or PCORnet CDM as the default CDM
+#' @param domain_tbl *tabular input* | a csv file that defines the domains where facts should be identified. defaults to the provided
 #'                     `scv_domain_file`, which contains the following fields:
-#' - `domain`: the CDM table where information for this domain can be found (i.e. drug_exposure)
-#' - `concept_field`: the column in the CDM table where `cdm` codes can be identified (i.e. drug_concept_id or dx)
-#' - `source_concept_field`: the column in the CDM table where `source` codes can be identified (i.e. drug_source_concept_id or raw_dx)
-#' - `date_field`: the column in the CDM table that should be used as the default date field for
+#' - `domain` | *character* | the CDM table where information for this domain can be found (i.e. drug_exposure)
+#' - `concept_field` | *character* | the column in the CDM table where `cdm` codes can be identified (i.e. drug_concept_id or dx)
+#' - `source_concept_field` | *character* |  the column in the CDM table where `source` codes can be identified (i.e. drug_source_concept_id or raw_dx)
+#' - `date_field` | *character* | the column in the CDM table that should be used as the default date field for
 #' over time analyses (i.e. drug_exposure_start_date or dx_date)
-#' - `vocabulary_field`: (PCORnet only) The name of the column in the domain table where the vocabulary type is stored
-#' @param code_type the type of code that is being used in the analysis, either `source` or `cdm`
-#' @param code_domain the domain where the codes in the concept set should be searched for; must match
+#' - `vocabulary_field` | *character* | (PCORnet only) The name of the column in the domain table where the vocabulary type is stored
+#' @param code_type *string* | the type of code that is being used in the analysis, either `source` or `cdm`
+#' @param code_domain *string* | the domain where the codes in the concept set should be searched for; must match
 #'                    a domain defined in `domain_tbl`
-#' @param jaccard_index **FOR `scv_ss_anom_cs` ONLY**: a boolean indicating whether a jaccard index
+#' @param jaccard_index *boolean* | **FOR `scv_ss_anom_cs` ONLY**: a boolean indicating whether a jaccard index
 #'                      should be computed at the visit level to determine how often two mapped concepts
 #'                      cooccur; can help identify potential post-coordination for SNOMED concepts
-#' @param multi_or_single_site Option to run the function on a single vs multiple sites
+#' @param multi_or_single_site *string* | Option to run the function on a single vs multiple sites
 #' - `single` - run the function for a single site
 #' - `multi` - run the function for multiple sites
-#' @param p_value the p value to be used as a threshold in the multi-site anomaly detection analysis
-#' @param anomaly_or_exploratory Option to conduct an exploratory or anomaly detection analysis. Exploratory analyses give a high
+#' @param p_value *numeric* | the p value to be used as a threshold in the multi-site anomaly detection analysis
+#' @param anomaly_or_exploratory *string* | Option to conduct an exploratory or anomaly detection analysis. Exploratory analyses give a high
 #'                               level summary of the data to examine the fact representation within the cohort. Anomaly detection
 #'                               analyses are specialized to identify outliers within the cohort.
-#' @param age_groups If you would like to stratify the results by age group,  create a table or CSV file with the following
+#' @param age_groups *tabular input* | If you would like to stratify the results by age group,  create a table or CSV file with the following
 #'                   columns and include it as the `age_groups` function parameter:
-#' - `min_age`: the minimum age for the group (i.e. 10)
-#' - `max_age`: the maximum age for the group (i.e. 20)
-#' - `group`: a string label for the group (i.e. 10-20, Young Adult, etc.)
+#' - `min_age` | *integer* |  the minimum age for the group (i.e. 10)
+#' - `max_age` | *integer* |  the maximum age for the group (i.e. 20)
+#' - `group` | *character* |  a string label for the group (i.e. 10-20, Young Adult, etc.)
 #'
 #' If you would *not* like to stratify by age group, leave the argument as NULL
-#' @param time a logical that tells the function whether you would like to look at the output over time
-#' @param time_span when time = TRUE, this argument defines the start and end dates for the time period of interest. should be
+#' @param time *boolean* | a logical that tells the function whether you would like to look at the output over time
+#' @param time_span *vector - length 2* | when time = TRUE, this argument defines the start and end dates for the time period of interest. should be
 #'                  formatted as c(start date, end date) in yyyy-mm-dd date format
-#' @param time_period when time = TRUE, this argument defines the distance between dates within the specified time period. defaults
+#' @param time_period *string* | when time = TRUE, this argument defines the distance between dates within the specified time period. defaults
 #'                    to `year`, but other time periods such as `month` or `week` are also acceptable
 #'
 #' @return a dataframe with counts and proportions for each source -> cdm or cdm -> source mapping
@@ -258,9 +258,11 @@ scv_process <- function(cohort,
     }
   }
 
-  cli::cli_inform(paste0(col_green('Based on your chosen parameters, we recommend using the following
-                       output function in scv_output: '), col_blue(style_bold(output_type,'.'))))
+  print(cli::boxx(c('You can optionally use this dataframe in the accompanying',
+                      '`scv_output` function. Here are the parameters you will need:', '', output_type$vector, '',
+                      'See ?scv_output for more details.'), padding = c(0,1,0,1),
+                    header = cli::col_cyan('Output Function Details')))
 
-  return(scv_tbl_final %>% replace_site_col())
+  return(scv_tbl_final %>% replace_site_col() %>% mutate(output_function = output_type$string))
 }
 

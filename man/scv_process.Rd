@@ -22,69 +22,69 @@ scv_process(
 )
 }
 \arguments{
-\item{cohort}{A dataframe with the cohort of patients for your study. Should include the columns:
+\item{cohort}{\emph{tabular input} | A dataframe with the cohort of patients for your study. Should include the columns:
 \itemize{
-\item \code{person_id}
-\item \code{start_date}
-\item \code{end_date}
-\item \code{site}
+\item \code{person_id} / \code{patid} | \emph{integer} / \emph{character}
+\item \code{start_date} | \emph{date}
+\item \code{end_date} | \emph{date}
+\item \code{site} | \emph{site}
 }}
 
-\item{concept_set}{for analyses where \code{time = FALSE}, a csv file with the source \strong{OR} cdm codes of interest for the analysis.
+\item{concept_set}{\emph{tabular input} | for analyses where \code{time = FALSE}, a csv file with the source \strong{OR} cdm codes of interest for the analysis.
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{               for analyses where `time = TRUE`, a vector with up to 5 source **OR** cdm codes of interest for the analysis.
+\if{html}{\out{<div class="sourceCode">}}\preformatted{               *vector* | for analyses where `time = TRUE`, a vector with up to 5 source **OR** cdm codes of interest for the analysis.
 }\if{html}{\out{</div>}}}
 
-\item{omop_or_pcornet}{Option to run the function using the OMOP or PCORnet CDM as the default CDM}
+\item{omop_or_pcornet}{\emph{string} | Option to run the function using the OMOP or PCORnet CDM as the default CDM}
 
-\item{domain_tbl}{a csv file that defines the domains where facts should be identified. defaults to the provided
+\item{domain_tbl}{\emph{tabular input} | a csv file that defines the domains where facts should be identified. defaults to the provided
 \code{scv_domain_file}, which contains the following fields:
 \itemize{
-\item \code{domain}: the CDM table where information for this domain can be found (i.e. drug_exposure)
-\item \code{concept_field}: the column in the CDM table where \code{cdm} codes can be identified (i.e. drug_concept_id or dx)
-\item \code{source_concept_field}: the column in the CDM table where \code{source} codes can be identified (i.e. drug_source_concept_id or raw_dx)
-\item \code{date_field}: the column in the CDM table that should be used as the default date field for
+\item \code{domain} | \emph{character} | the CDM table where information for this domain can be found (i.e. drug_exposure)
+\item \code{concept_field} | \emph{character} | the column in the CDM table where \code{cdm} codes can be identified (i.e. drug_concept_id or dx)
+\item \code{source_concept_field} | \emph{character} |  the column in the CDM table where \code{source} codes can be identified (i.e. drug_source_concept_id or raw_dx)
+\item \code{date_field} | \emph{character} | the column in the CDM table that should be used as the default date field for
 over time analyses (i.e. drug_exposure_start_date or dx_date)
-\item \code{vocabulary_field}: (PCORnet only) The name of the column in the domain table where the vocabulary type is stored
+\item \code{vocabulary_field} | \emph{character} | (PCORnet only) The name of the column in the domain table where the vocabulary type is stored
 }}
 
-\item{code_type}{the type of code that is being used in the analysis, either \code{source} or \code{cdm}}
+\item{code_type}{\emph{string} | the type of code that is being used in the analysis, either \code{source} or \code{cdm}}
 
-\item{code_domain}{the domain where the codes in the concept set should be searched for; must match
+\item{code_domain}{\emph{string} | the domain where the codes in the concept set should be searched for; must match
 a domain defined in \code{domain_tbl}}
 
-\item{jaccard_index}{\strong{FOR \code{scv_ss_anom_cs} ONLY}: a boolean indicating whether a jaccard index
+\item{jaccard_index}{\emph{boolean} | \strong{FOR \code{scv_ss_anom_cs} ONLY}: a boolean indicating whether a jaccard index
 should be computed at the visit level to determine how often two mapped concepts
 cooccur; can help identify potential post-coordination for SNOMED concepts}
 
-\item{multi_or_single_site}{Option to run the function on a single vs multiple sites
+\item{multi_or_single_site}{\emph{string} | Option to run the function on a single vs multiple sites
 \itemize{
 \item \code{single} - run the function for a single site
 \item \code{multi} - run the function for multiple sites
 }}
 
-\item{anomaly_or_exploratory}{Option to conduct an exploratory or anomaly detection analysis. Exploratory analyses give a high
+\item{anomaly_or_exploratory}{\emph{string} | Option to conduct an exploratory or anomaly detection analysis. Exploratory analyses give a high
 level summary of the data to examine the fact representation within the cohort. Anomaly detection
 analyses are specialized to identify outliers within the cohort.}
 
-\item{p_value}{the p value to be used as a threshold in the multi-site anomaly detection analysis}
+\item{p_value}{\emph{numeric} | the p value to be used as a threshold in the multi-site anomaly detection analysis}
 
-\item{age_groups}{If you would like to stratify the results by age group,  create a table or CSV file with the following
+\item{age_groups}{\emph{tabular input} | If you would like to stratify the results by age group,  create a table or CSV file with the following
 columns and include it as the \code{age_groups} function parameter:
 \itemize{
-\item \code{min_age}: the minimum age for the group (i.e. 10)
-\item \code{max_age}: the maximum age for the group (i.e. 20)
-\item \code{group}: a string label for the group (i.e. 10-20, Young Adult, etc.)
+\item \code{min_age} | \emph{integer} |  the minimum age for the group (i.e. 10)
+\item \code{max_age} | \emph{integer} |  the maximum age for the group (i.e. 20)
+\item \code{group} | \emph{character} |  a string label for the group (i.e. 10-20, Young Adult, etc.)
 }
 
 If you would \emph{not} like to stratify by age group, leave the argument as NULL}
 
-\item{time}{a logical that tells the function whether you would like to look at the output over time}
+\item{time}{\emph{boolean} | a logical that tells the function whether you would like to look at the output over time}
 
-\item{time_span}{when time = TRUE, this argument defines the start and end dates for the time period of interest. should be
+\item{time_span}{\emph{vector - length 2} | when time = TRUE, this argument defines the start and end dates for the time period of interest. should be
 formatted as c(start date, end date) in yyyy-mm-dd date format}
 
-\item{time_period}{when time = TRUE, this argument defines the distance between dates within the specified time period. defaults
+\item{time_period}{\emph{string} | when time = TRUE, this argument defines the distance between dates within the specified time period. defaults
 to \code{year}, but other time periods such as \code{month} or \code{week} are also acceptable}
 }
 \value{
@@ -153,7 +153,6 @@ scv_process_example
 
 #' Execute `scv_output` function
 scv_output_example <- scv_output(process_output = scv_process_example,
-                                 output_function = 'scv_ss_exp_cs',
                                  code_type = 'cdm',
                                  vocab_tbl = NULL)
 

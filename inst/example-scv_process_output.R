@@ -49,7 +49,6 @@ scv_process_example
 
 #' Execute `scv_output` function
 scv_output_example <- scv_output(process_output = scv_process_example,
-                                 output_function = 'scv_ss_exp_cs',
                                  code_type = 'cdm',
                                  vocab_tbl = NULL)
 

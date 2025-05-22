@@ -6,23 +6,22 @@
 #' be adjusted by the user after the graph has been output using `+ theme()`. Most graphs can
 #' also be made interactive using `make_interactive_squba()`
 #'
-#' @param process_output the output of the `scv_process` function
-#' @param output_function the name of the output function that should be used provided in the `parameter_summary` csv
-#'                        file that is output to the provided results folder after running the `scv_process` function
-#' @param code_type the type of code that is being used in the analysis, either `source` or `cdm`;
+#' @param process_output *tabular input* | the output of the `scv_process` function
+#' @param code_type *string* | the type of code that is being used in the analysis, either `source` or `cdm`;
 #'                  should match the code_type that was defined when running `scv_process`
-#' @param filter_concept for `scv_ms_anom_la` only -- choose ONE concept_id from the concept_set provided in
-#'                       `scv_process` to filter the output
-#' @param filter_mapped for `scv_ms_anom_la` only -- choose ONE mapped concept from those associated with the
-#'                      concept_id provided in `filter_concept`; options can be found in the `mapped_id` column
-#'                      of `scv_process`
-#' @param num_codes the number of top codes of code_type that should be displayed in the analysis
+#' @param filter_concept *(integer or string) or vector* | choose concept from the concept_set provided in
+#'                       `scv_process` to filter the output; used for all inputs EXCEPT `ss_exp_cs`, `ss_exp_la`,
+#'                       and `ss_anom_cs` (when jaccard_index is FALSE)
+#' @param filter_mapped *(integer or string) or vector* | choose mapped concept from those associated with the
+#'                      concept_id provided in `filter_concept`; options can be found in the `source_concept_id` column
+#'                      of `scv_process`; used for `ms_anom_la`
+#' @param num_codes *integer* | the number of top codes of code_type that should be displayed in the analysis
 #'
-#'                  used for `scv_ss_exp_cs` and `scv_ms_exp_cs`
-#' @param num_mappings the number of top mappings that should be displayed for each code of code_type
+#'                  used for `ss_exp_cs` and `ss_anom_cs`
+#' @param num_mappings *integer* | the number of top mappings that should be displayed for each code of code_type
 #'
-#'                     used for `scv_ss_exp_cs`
-#' @param vocab_tbl OPTIONAL: the location of an external vocabulary table containing concept names for
+#'                     used for `ss_exp_cs`, `ss_exp_la`, `ms_exp_la`, `ss_anom_cs`, `ms_anom_cs`
+#' @param vocab_tbl *tabular input* | OPTIONAL: the location of an external vocabulary table containing concept names for
 #'                  the provided codes. if not NULL, concept names will be available in either a reference
 #'                  table or in a hover tooltip
 #'
@@ -36,7 +35,6 @@
 #' @export
 #'
 scv_output <- function(process_output,
-                       output_function,
                        code_type,
                        #facet = NULL,
                        filter_concept = NULL,
@@ -44,6 +42,9 @@ scv_output <- function(process_output,
                        num_codes = 10,
                        num_mappings = 25,
                        vocab_tbl = NULL){
+
+  # extract output function
+  output_function <- process_output %>% collect() %>% ungroup() %>% distinct(output_function) %>% pull()
 
   if(output_function != 'scv_ss_anom_la'){
 

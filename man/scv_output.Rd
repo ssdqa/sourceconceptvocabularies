@@ -6,7 +6,6 @@
 \usage{
 scv_output(
   process_output,
-  output_function,
   code_type,
   filter_concept = NULL,
   filter_mapped = NULL,
@@ -16,32 +15,30 @@ scv_output(
 )
 }
 \arguments{
-\item{process_output}{the output of the \code{scv_process} function}
+\item{process_output}{\emph{tabular input} | the output of the \code{scv_process} function}
 
-\item{output_function}{the name of the output function that should be used provided in the \code{parameter_summary} csv
-file that is output to the provided results folder after running the \code{scv_process} function}
-
-\item{code_type}{the type of code that is being used in the analysis, either \code{source} or \code{cdm};
+\item{code_type}{\emph{string} | the type of code that is being used in the analysis, either \code{source} or \code{cdm};
 should match the code_type that was defined when running \code{scv_process}}
 
-\item{filter_concept}{for \code{scv_ms_anom_la} only -- choose ONE concept_id from the concept_set provided in
-\code{scv_process} to filter the output}
+\item{filter_concept}{\emph{(integer or string) or vector} | choose concept from the concept_set provided in
+\code{scv_process} to filter the output; used for all inputs EXCEPT \code{ss_exp_cs}, \code{ss_exp_la},
+and \code{ss_anom_cs} (when jaccard_index is FALSE)}
 
-\item{filter_mapped}{for \code{scv_ms_anom_la} only -- choose ONE mapped concept from those associated with the
-concept_id provided in \code{filter_concept}; options can be found in the \code{mapped_id} column
-of \code{scv_process}}
+\item{filter_mapped}{\emph{(integer or string) or vector} | choose mapped concept from those associated with the
+concept_id provided in \code{filter_concept}; options can be found in the \code{source_concept_id} column
+of \code{scv_process}; used for \code{ms_anom_la}}
 
-\item{num_codes}{the number of top codes of code_type that should be displayed in the analysis
+\item{num_codes}{\emph{integer} | the number of top codes of code_type that should be displayed in the analysis
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{             used for `scv_ss_exp_cs` and `scv_ms_exp_cs`
+\if{html}{\out{<div class="sourceCode">}}\preformatted{             used for `ss_exp_cs` and `ss_anom_cs`
 }\if{html}{\out{</div>}}}
 
-\item{num_mappings}{the number of top mappings that should be displayed for each code of code_type
+\item{num_mappings}{\emph{integer} | the number of top mappings that should be displayed for each code of code_type
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{                used for `scv_ss_exp_cs`
+\if{html}{\out{<div class="sourceCode">}}\preformatted{                used for `ss_exp_cs`, `ss_exp_la`, `ms_exp_la`, `ss_anom_cs`, `ms_anom_cs`
 }\if{html}{\out{</div>}}}
 
-\item{vocab_tbl}{OPTIONAL: the location of an external vocabulary table containing concept names for
+\item{vocab_tbl}{\emph{tabular input} | OPTIONAL: the location of an external vocabulary table containing concept names for
 the provided codes. if not NULL, concept names will be available in either a reference
 table or in a hover tooltip}
 }
@@ -110,7 +107,6 @@ scv_process_example
 
 #' Execute `scv_output` function
 scv_output_example <- scv_output(process_output = scv_process_example,
-                                 output_function = 'scv_ss_exp_cs',
                                  code_type = 'cdm',
                                  vocab_tbl = NULL)
 

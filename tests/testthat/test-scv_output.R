@@ -18,10 +18,11 @@ test_that('single site, exploratory, no time', {
                             denom_concept_ct = c(100,100,100,100,100,100),
                             denom_source_ct = c(50,55,60,65,70,75),
                             concept_prop = c(0.1,0.2,0.3,0.4,0.5,0.6),
-                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6))
+                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6),
+                            output_function = c('scv_ss_exp_cs','scv_ss_exp_cs','scv_ss_exp_cs',
+                                                'scv_ss_exp_cs','scv_ss_exp_cs','scv_ss_exp_cs'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_exp_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL))
 
@@ -38,10 +39,11 @@ test_that('multi site, exploratory, no time', {
                             denom_concept_ct = c(100,100,100,200,200,200),
                             denom_source_ct = c(50,55,60,65,70,75),
                             concept_prop = c(0.1,0.2,0.3,0.4,0.5,0.6),
-                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6))
+                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6),
+                            output_function = c('scv_ms_exp_cs','scv_ms_exp_cs','scv_ms_exp_cs',
+                                                'scv_ms_exp_cs','scv_ms_exp_cs','scv_ms_exp_cs'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ms_exp_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL))
 
@@ -72,10 +74,11 @@ test_that('single site, anomaly detection, no time', {
                             'lower_tail' = c(0.8134, 0.8134, 0.8134,0.8134, 0.8134, 0.8134),
                             'upper_tail' = c(0.932, 0.932, 0.932,0.932, 0.932, 0.932),
                             'anomaly_yn' = c('no outlier', 'outlier', 'outlier',
-                                             'no outlier', 'outlier', 'outlier'))
+                                             'no outlier', 'outlier', 'outlier'),
+                            'output_function' = c('scv_ss_anom_cs','scv_ss_anom_cs','scv_ss_anom_cs',
+                                                'scv_ss_anom_cs','scv_ss_anom_cs','scv_ss_anom_cs'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_anom_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL))
 
@@ -92,10 +95,11 @@ test_that('single site, anomaly detection, no time jaccard', {
                             cocount = c(15, 20, 25, 30, 35, 40),
                             concept1_ct = c(10,15,20,25,30,35),
                             concept2_ct = c(15,20,25,25,35,10),
-                            jaccard_index = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6))
+                            jaccard_index = c(0.1, 0.2, 0.3, 0.4, 0.5, 0.6),
+                            'output_function' = c('scv_ss_anom_cs','scv_ss_anom_cs','scv_ss_anom_cs',
+                                                  'scv_ss_anom_cs','scv_ss_anom_cs','scv_ss_anom_cs'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_anom_cs',
                              filter_concept = 1,
                              code_type = 'cdm',
                              vocab_tbl = NULL))
@@ -127,16 +131,16 @@ test_that('multi site, anomaly detection, no time', {
                             'lower_tail' = c(0.8134, 0.8134, 0.8134,0.8134, 0.8134, 0.8134),
                             'upper_tail' = c(0.932, 0.932, 0.932,0.932, 0.932, 0.932),
                             'anomaly_yn' = c('no outlier', 'outlier', 'outlier',
-                                             'no outlier', 'outlier', 'outlier'))
+                                             'no outlier', 'outlier', 'outlier'),
+                            'output_function' = c('scv_ms_anom_cs','scv_ms_anom_cs','scv_ms_anom_cs',
+                                                  'scv_ms_anom_cs','scv_ms_anom_cs','scv_ms_anom_cs'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ms_anom_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
 
   expect_no_error(scv_output(process_output = tbl_test %>% mutate(anomaly_yn == 'no outlier in group'),
-                             output_function = 'scv_ms_anom_cs',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -160,10 +164,12 @@ test_that('single site, exploratory, across time', {
                             denom_concept_ct = c(100,100,100,100,100,100,100,100),
                             denom_source_ct = c(50,55,60,65,70,75,80,85),
                             concept_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8),
-                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8))
+                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8),
+                            'output_function' = c('scv_ss_exp_la','scv_ss_exp_la','scv_ss_exp_la',
+                                                  'scv_ss_exp_la','scv_ss_exp_la','scv_ss_exp_la',
+                                                  'scv_ss_exp_la','scv_ss_exp_la'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_exp_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -186,10 +192,12 @@ test_that('multi site, exploratory, across time', {
                             denom_concept_ct = c(100,100,100,100,100,100,100,100),
                             denom_source_ct = c(50,55,60,65,70,75,80,85),
                             concept_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8),
-                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8))
+                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8),
+                            'output_function' = c('scv_ms_exp_la','scv_ms_exp_la','scv_ms_exp_la',
+                                                  'scv_ms_exp_la','scv_ms_exp_la','scv_ms_exp_la',
+                                                  'scv_ms_exp_la','scv_ms_exp_la'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ms_exp_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -213,10 +221,12 @@ test_that('single site, anomaly detection, across time -- year', {
                             denom_concept_ct = c(100,100,100,100,100,100,100,100),
                             denom_source_ct = c(50,55,60,65,70,75,80,85),
                             concept_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8),
-                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8))
+                            source_prop = c(0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8),
+                            'output_function' = c('scv_ss_anom_la','scv_ss_anom_la','scv_ss_anom_la',
+                                                  'scv_ss_anom_la','scv_ss_anom_la','scv_ss_anom_la',
+                                                  'scv_ss_anom_la','scv_ss_anom_la'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_anom_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -248,10 +258,13 @@ test_that('single site, anomaly detection, across time -- month', {
                             'recomposed_l2' = c(0.84, 0.8, 0.8, 0.89, 0.86,
                                                 0.84, 0.8, 0.8, 0.89, 0.86),
                             'observed_clean' = c(0.46, 0.57, 0.69, 0.82, 0.88,
-                                                 0.46, 0.57, 0.69, 0.82, 0.88))
+                                                 0.46, 0.57, 0.69, 0.82, 0.88),
+                            'output_function' = c('scv_ss_anom_la','scv_ss_anom_la','scv_ss_anom_la',
+                                                  'scv_ss_anom_la','scv_ss_anom_la','scv_ss_anom_la',
+                                                  'scv_ss_anom_la','scv_ss_anom_la','scv_ss_anom_la',
+                                                  'scv_ss_anom_la'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ss_anom_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1))
@@ -273,10 +286,12 @@ test_that('multi site, anomaly detection, across time', {
                             'median' = c(0.87, 0.87, 0.87, 0.87, 0.87, 0.87, 0.87, 0.87, 0.87),
                             'date_numeric' = c(17000, 17000, 17000, 17000, 17000, 17000, 17000, 17000, 17000),
                             'site_loess' = c(0.84, 0.87, 0.89, 0.91, 0.89, 0.73, 0.81, 0.83, 0.94),
-                            'dist_eucl_mean' = c(0.84,0.84,0.84,0.84,0.84,0.9,0.9,0.9,0.9))
+                            'dist_eucl_mean' = c(0.84,0.84,0.84,0.84,0.84,0.9,0.9,0.9,0.9),
+                            'output_function' = c('scv_ms_anom_la','scv_ms_anom_la','scv_ms_anom_la',
+                                                  'scv_ms_anom_la','scv_ms_anom_la','scv_ms_anom_la',
+                                                  'scv_ms_anom_la','scv_ms_anom_la','scv_ms_anom_la'))
 
   expect_no_error(scv_output(process_output = tbl_test,
-                             output_function = 'scv_ms_anom_la',
                              code_type = 'cdm',
                              vocab_tbl = NULL,
                              filter_concept = 1,
