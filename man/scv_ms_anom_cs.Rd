@@ -9,7 +9,9 @@ scv_ms_anom_cs(
   code_type,
   facet = NULL,
   filter_concept,
-  num_mappings = 20
+  num_mappings = 20,
+  large_n = FALSE,
+  large_n_sites = NULL
 )
 }
 \arguments{
@@ -23,6 +25,11 @@ should match the code_type provided when running \code{scv_process}}
 \item{filter_concept}{the code_type concept_id of interest for which to display its mappings}
 
 \item{num_mappings}{an integer indicating the number of top mappings that should be displayed}
+
+\item{large_n}{a boolean indicating whether the large N visualization, intended for a high
+volume of sites, should be used; defaults to FALSE}
+
+\item{large_n_sites}{a vector of site names that can optionally generate a filtered visualization}
 }
 \value{
 a dot plot where the shape of the dot represents whether the point is

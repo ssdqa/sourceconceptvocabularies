@@ -12,4 +12,6 @@ utils::globalVariables(c('site', 'site_loess', 'person_id', 'patid',
                        'text_raw', 'text_smooth', 'tooltip', 'concept1', 'concept2',
                        'cocount', 'concept1_ct', 'concept2_ct', 'concept1_name',
                        'concept2_name', 'concept_count_union', 'jaccard_index',
-                       'primary_col', 'var_visit_ct', 'visit_id'))
+                       'primary_col', 'var_visit_ct', 'visit_id', 'zscr',
+                       'closest_site', 'farthest_site', 'nvar', 'q1', 'q3', 'med',
+                       'site_anoms', 'site_w_anom', 'value', 'iqr_val', 'delim'))

@@ -11,7 +11,9 @@ scv_output(
   filter_mapped = NULL,
   num_codes = 10,
   num_mappings = 25,
-  vocab_tbl = NULL
+  vocab_tbl = NULL,
+  large_n = FALSE,
+  large_n_sites = NULL
 )
 }
 \arguments{
@@ -41,6 +43,11 @@ of \code{scv_process}; used for \code{ms_anom_la}}
 \item{vocab_tbl}{\emph{tabular input} | OPTIONAL: the location of an external vocabulary table containing concept names for
 the provided codes. if not NULL, concept names will be available in either a reference
 table or in a hover tooltip}
+
+\item{large_n}{\emph{boolean} | for multi-site analyses, a boolean indicating whether the large N visualization, intended for a high
+volume of sites, should be used; defaults to FALSE}
+
+\item{large_n_sites}{\emph{vector} | when large_n is TRUE, a vector of site names that can optionally generate a filtered visualization}
 }
 \value{
 a graph to visualize the results from \code{scv_process} based on the parameters provided

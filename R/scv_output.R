@@ -24,6 +24,9 @@
 #' @param vocab_tbl *tabular input* | OPTIONAL: the location of an external vocabulary table containing concept names for
 #'                  the provided codes. if not NULL, concept names will be available in either a reference
 #'                  table or in a hover tooltip
+#' @param large_n *boolean* | for multi-site analyses, a boolean indicating whether the large N visualization, intended for a high
+#'                volume of sites, should be used; defaults to FALSE
+#' @param large_n_sites *vector* | when large_n is TRUE, a vector of site names that can optionally generate a filtered visualization
 #'
 #' @return a graph to visualize the results from `scv_process` based on the parameters provided
 #'
@@ -41,7 +44,9 @@ scv_output <- function(process_output,
                        filter_mapped = NULL,
                        num_codes = 10,
                        num_mappings = 25,
-                       vocab_tbl = NULL){
+                       vocab_tbl = NULL,
+                       large_n = FALSE,
+                       large_n_sites = NULL){
 
   # extract output function
   output_function <- process_output %>% collect() %>% ungroup() %>% distinct(output_function) %>% pull()
@@ -112,7 +117,9 @@ scv_output <- function(process_output,
                                  code_type = code_type,
                                  facet = facet,
                                  filter_concept = filter_concept,
-                                 num_mappings = num_mappings)
+                                 num_mappings = num_mappings,
+                                 large_n = large_n,
+                                 large_n_sites = large_n_sites)
   }else if(output_function == 'scv_ss_anom_cs'){
     scv_output <- scv_ss_anom_cs(process_output = process_output,
                                  code_type = code_type,
@@ -124,7 +131,9 @@ scv_output <- function(process_output,
     scv_output <- scv_ms_exp_cs(process_output = process_output,
                                 code_type = code_type,
                                 facet = facet,
-                                num_codes = num_codes)
+                                num_codes = num_codes,
+                                large_n = large_n,
+                                large_n_sites = large_n_sites)
   }else if(output_function == 'scv_ss_exp_cs'){
     scv_output <- scv_ss_exp_cs(process_output = process_output,
                                 code_type = code_type,
@@ -135,7 +144,9 @@ scv_output <- function(process_output,
     scv_output <- scv_ms_anom_la(process_output = process_output,
                                  code_type = code_type,
                                  filter_concept = filter_concept,
-                                 filter_mapped = filter_mapped)
+                                 filter_mapped = filter_mapped,
+                                 large_n = large_n,
+                                 large_n_sites = large_n_sites)
   }else if(output_function == 'scv_ss_anom_la'){
     scv_output <- scv_ss_anom_la(process_output = process_output,
                                  code_type = code_type,
@@ -146,7 +157,9 @@ scv_output <- function(process_output,
                                 code_type = code_type,
                                 filter_concept = filter_concept,
                                 num_mappings = num_mappings,
-                                facet = facet)
+                                facet = facet,
+                                large_n = large_n,
+                                large_n_sites = large_n_sites)
   }else if(output_function == 'scv_ss_exp_la'){
     scv_output <- scv_ss_exp_la(process_output = process_output,
                                 code_type = code_type,

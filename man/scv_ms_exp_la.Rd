@@ -9,7 +9,9 @@ scv_ms_exp_la(
   code_type,
   filter_concept,
   num_mappings = 10,
-  facet = NULL
+  facet = NULL,
+  large_n = FALSE,
+  large_n_sites = NULL
 )
 }
 \arguments{
@@ -24,6 +26,11 @@ should match the code_type provided when running \code{scv_process}}
 that should be displayed}
 
 \item{facet}{the variables by which you would like to facet the graph}
+
+\item{large_n}{a boolean indicating whether the large N visualization, intended for a high
+volume of sites, should be used; defaults to FALSE}
+
+\item{large_n_sites}{a vector of site names that can optionally generate a filtered visualization}
 }
 \value{
 a line graph with one facet per code displaying the proportion of mapped codes

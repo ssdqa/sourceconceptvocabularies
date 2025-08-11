@@ -1,10 +1,10 @@
 
 test_that('errors on incorrect output_function', {
 
-  tbl_test <- data.frame('test'= c(1, 2, 3))
+  tbl_test <- data.frame('test'= c(1, 2, 3),
+                         'output_function' = c('test','test','test'))
 
-  expect_error(scv_output(process_output = tbl_test,
-                          output_function = 'scv_test'))
+  expect_error(scv_output(process_output = tbl_test))
 })
 
 

@@ -4,7 +4,14 @@
 \alias{scv_ms_anom_la}
 \title{\strong{Multi-Site, Anomaly, Longitudinal}}
 \usage{
-scv_ms_anom_la(process_output, code_type, filter_concept, filter_mapped)
+scv_ms_anom_la(
+  process_output,
+  code_type,
+  filter_concept,
+  filter_mapped,
+  large_n = FALSE,
+  large_n_sites = NULL
+)
 }
 \arguments{
 \item{process_output}{output from \code{evp_process}}
@@ -15,6 +22,11 @@ should match the code_type provided when running \code{scv_process}}
 \item{filter_concept}{the code_type concept of interest to be displayed in the output}
 
 \item{filter_mapped}{the mapped concept of interest to be displayed in the output}
+
+\item{large_n}{a boolean indicating whether the large N visualization, intended for a high
+volume of sites, should be used; defaults to FALSE}
+
+\item{large_n_sites}{a vector of site names that can optionally generate a filtered visualization}
 }
 \value{
 three graphs:
