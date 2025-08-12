@@ -915,12 +915,14 @@ scv_ms_exp_la <- function(process_output,
                  label2 = ct
       )) +
       geom_line(alpha = a, linetype = lt) +
-      geom_line(data = site_spec, aes(y = !!sym(prop))) +
+      # geom_line(data = site_spec, aes(y = !!sym(prop))) +
       scale_color_squba() +
       facet_wrap((facet)) +
       theme_minimal() +
       labs(title = paste0('Top ', num_mappings, ' Mappings for ', filter_concept, ' Over Time'),
            color = 'Site')
+
+    if(!is.null(large_n_sites)){p <- p + geom_line(data = site_spec, aes(y = !!sym(prop)))}
   }
 
   p[["metadata"]] <- tibble('pkg_backend' = 'plotly',
@@ -1058,10 +1060,8 @@ scv_ms_anom_la <- function(process_output,
   }else{
     q <- ggplot(allsites, aes(x = time_start)) +
       geom_ribbon(data = iqr_dat, aes(ymin = q1, ymax = q3), alpha = 0.2) +
-      geom_line(aes(y = prop_col, color = site, group = site, text=text_raw), linewidth=1.1) +
-      geom_line(data = dat_to_plot %>% filter(site %in% large_n_sites),
-                aes(y = prop_col, color = site, group = site, text=text_raw),
-                linewidth=0.2) +
+      geom_line(aes(y = prop_col, color = site, group = site), linewidth=1.1) +
+      geom_point_interactive(aes(y = prop_col, color = site, group = site, tooltip=text_raw)) +
       theme_minimal() +
       #theme(axis.text.x = element_text(angle = 30, vjust = 1, hjust=1)) +
       scale_color_squba() +
@@ -1076,8 +1076,8 @@ scv_ms_anom_la <- function(process_output,
         distinct(!!sym(concept_col), dist_eucl_mean) %>%
         ggplot(aes(x = dist_eucl_mean, y = !!sym(concept_col))) +
         geom_boxplot() +
-        geom_point(color = 'gray',
-                   alpha = 0.75) +
+        geom_point_interactive(color = 'gray',
+                               alpha = 0.75, aes(tooltip = dist_eucl_mean)) +
         theme_minimal() +
         theme(axis.text.y = element_blank(),
               legend.title = element_blank()) +
@@ -1087,12 +1087,19 @@ scv_ms_anom_la <- function(process_output,
              title = paste0('Distribution of Euclidean Distances'))
 
     }else{
+
+      q <- q + geom_line(data = dat_to_plot %>% filter(site %in% large_n_sites),
+                         aes(y = prop_col, color = site, group = site),
+                         linewidth=0.2) +
+        geom_point_interactive(data = dat_to_plot %>% filter(site %in% large_n_sites),
+                               aes(y = prop_col, color = site, group = site, tooltip=text_raw))
+
       t <- dat_to_plot %>%
         distinct(!!sym(concept_col),dist_eucl_mean) %>%
         ggplot(aes(x = dist_eucl_mean, y = !!sym(concept_col))) +
         geom_boxplot() +
-        geom_point(data = dat_to_plot %>% filter(site %in% large_n_sites),
-                   aes(color = site)) +
+        geom_point_interactive(data = dat_to_plot %>% filter(site %in% large_n_sites),
+                               aes(color = site, tooltip = dist_eucl_mean)) +
         theme_minimal() +
         theme(axis.text.y = element_blank(),
               legend.title = element_blank()) +
@@ -1102,6 +1109,11 @@ scv_ms_anom_la <- function(process_output,
              y = '',
              title = paste0('Distribution of Euclidean Distances'))
     }
+
+    q[['metadata']] <- tibble('pkg_backend' = 'ggiraph',
+                              'tooltip' = TRUE)
+    t[['metadata']] <- tibble('pkg_backend' = 'ggiraph',
+                              'tooltip' = TRUE)
 
     output <- q + t + plot_layout(ncol = 1, heights = c(5, 1))
   }
