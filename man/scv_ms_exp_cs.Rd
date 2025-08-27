@@ -4,7 +4,14 @@
 \alias{scv_ms_exp_cs}
 \title{\emph{Multi Site, Exploratory, Cross-Sectional}}
 \usage{
-scv_ms_exp_cs(process_output, code_type, facet = NULL, num_codes = 10)
+scv_ms_exp_cs(
+  process_output,
+  code_type,
+  facet = NULL,
+  num_codes = 10,
+  large_n = FALSE,
+  large_n_sites = NULL
+)
 }
 \arguments{
 \item{process_output}{dataframe output by \code{scv_process}}
@@ -15,6 +22,11 @@ should match the code_type provided when running \code{scv_process}}
 \item{facet}{the variables by which you would like to facet the graph}
 
 \item{num_codes}{the number of top codes of code_type that should be displayed in the graph}
+
+\item{large_n}{a boolean indicating whether the large N visualization, intended for a high
+volume of sites, should be used; defaults to FALSE}
+
+\item{large_n_sites}{a vector of site names that can optionally generate a filtered visualization}
 }
 \value{
 a searchable and filterable table with mappings, proportion of representation, and
