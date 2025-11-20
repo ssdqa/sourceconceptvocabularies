@@ -1,0 +1,36 @@
+# Source and Concept Vocabularies
+
+The Source and Concept Vocabularies module summarizes the different
+mappings of either CDM or Source concepts from a user-provided concept
+set.
+
+## Installation
+
+You can install the development version of this package like so:
+
+``` r
+devtools::install_github('ssdqa/sourceconceptvocabularies')
+```
+
+## End
+
+# Package index
+
+## Module Execution
+
+- [`scv_process()`](https://ssdqa.github.io/sourceconceptvocabularies/reference/scv_process.md)
+  : Source and Concept Vocabularies
+- [`scv_output()`](https://ssdqa.github.io/sourceconceptvocabularies/reference/scv_output.md)
+  : Source and Concept Vocabularies – Output Generation
+
+## Sample Input
+
+- [`scv_domain_file`](https://ssdqa.github.io/sourceconceptvocabularies/reference/scv_domain_file.md)
+  : SCV Sample Domain File
+
+# Articles
+
+### All vignettes
+
+- [Multi-Site Analysis for Independent Data
+  Sources](https://ssdqa.github.io/sourceconceptvocabularies/articles/multisite_independent.md):
