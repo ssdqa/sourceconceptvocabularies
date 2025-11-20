@@ -23,6 +23,8 @@
 #'
 #' @importFrom purrr set_names
 #'
+#' @keywords internal
+#'
 check_code_dist <- function(cohort,
                             concept_set,
                             code_type,
@@ -159,6 +161,8 @@ check_code_dist <- function(cohort,
 #'          similarity index of two mapped concepts within the same visit
 #'
 #' @importFrom tidyr pivot_longer
+#'
+#' @keywords internal
 #'
 compute_jaccard_scv <- function(cohort,
                                 domain_tbl,

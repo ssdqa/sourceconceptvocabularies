@@ -45,3 +45,4 @@ these counts are computed for each user-specified time increment.
 \description{
 Base SCV function
 }
+\keyword{internal}

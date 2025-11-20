@@ -31,6 +31,8 @@ NULL
 #' @return dataframe that summarizes the overall median number of mappings, group-specific number of
 #'         mappings, and how many MAD from the overall median a code falls
 #'
+#' @keywords internal
+#'
 compute_mappings_per_code <- function(tbl,
                                       col,
                                       denom,
@@ -70,11 +72,13 @@ compute_mappings_per_code <- function(tbl,
 #' @param num_mappings the number of top mappings that should be displayed for each code
 #'
 #' @return a heatmap with one facet per code and additional facet groupings, limited to the number
-#'         of codes selected with @num_codes
+#'         of codes selected with num_codes
 #'         mapped code along the y-axis and proportion of representation as the fill
 #' @return a reference table with additional information about the codes used as the facet.
 #'         includes the code and denominator count, and will also include the concept name
 #'         if @vocab_tbl is not NULL
+#'
+#' @keywords internal
 #'
 scv_ss_exp_cs <- function(process_output,
                           code_type,
@@ -183,8 +187,10 @@ scv_ss_exp_cs <- function(process_output,
 #'
 #' @return a searchable and filterable table with mappings, proportion of representation, and
 #'         denominator counts for the number of codes selected
-#'         in @num_codes
-#'         concept name will be included if @vocab_tbl is not NULL
+#'         in num_codes
+#'         concept name will be included if vocab_tbl is not NULL
+#'
+#' @keywords internal
 #'
 scv_ms_exp_cs <- function(process_output,
                           code_type,
@@ -304,6 +310,8 @@ scv_ms_exp_cs <- function(process_output,
 #'         anomalous, the color of the dot represents the proportion of usage
 #'         for a cdm/source concept pair, and the size of the dot represents the
 #'         mean proportion for the code type along the x axis
+#'
+#' @keywords internal
 #'
 scv_ss_anom_cs <- function(process_output,
                            code_type,
@@ -454,6 +462,8 @@ scv_ss_anom_cs <- function(process_output,
 #'         anomalous, the color of the dot represents the proportion of representation
 #'         of a filter_concept/mapping concept pair, and the size of the dot
 #'         represents the mean proportion across all sites
+#'
+#' @keywords internal
 #'
 scv_ms_anom_cs <- function(process_output,
                            code_type,
@@ -716,6 +726,8 @@ scv_ms_anom_cs <- function(process_output,
 #' @return a reference table with total counts of each code across the entire user selected
 #'         time period
 #'
+#' @keywords internal
+#'
 scv_ss_exp_la <- function(process_output,
                           code_type,
                           num_mappings = 10,
@@ -797,6 +809,8 @@ scv_ss_exp_la <- function(process_output,
 #'         across the user selected time period
 #' @return a reference table with total counts of each code across the entire user selected
 #'         time period
+#'
+#' @keywords internal
 #'
 scv_ms_exp_la <- function(process_output,
                           code_type,
@@ -955,6 +969,8 @@ scv_ms_exp_la <- function(process_output,
 #'    proportion as the fill
 #'
 #' THIS GRAPH SHOWS ONLY ONE CONCEPT PAIR AT A TIME!
+#'
+#' @keywords internal
 #'
 
 scv_ms_anom_la <- function(process_output,
@@ -1140,6 +1156,8 @@ scv_ms_anom_la <- function(process_output,
 #'         if analysis was executed by month or smaller, an STL regression is
 #'         conducted and outliers are marked with red dots. the graphs representing
 #'         the data removed in the regression are also returned
+#'
+#' @keywords internal
 #'
 scv_ss_anom_la <- function(process_output,
                            code_type,

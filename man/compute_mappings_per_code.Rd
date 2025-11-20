@@ -24,3 +24,4 @@ mappings, and how many MAD from the overall median a code falls
 \description{
 Compute number and median mappings per code
 }
+\keyword{internal}

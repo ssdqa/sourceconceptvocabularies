@@ -9,52 +9,115 @@
 #' by site, age group, and/or time. This function is compatible with both the OMOP and the PCORnet CDMs
 #' based on the user's selection.
 #'
-#' @param cohort *tabular input* | A dataframe with the cohort of patients for your study. Should include the columns:
-#' - `person_id` / `patid` | *integer* / *character*
-#' - `start_date` | *date*
-#' - `end_date` | *date*
-#' - `site` | *site*
-#' @param concept_set *tabular input* | for analyses where `time = FALSE`, a csv file with the source **OR** cdm codes of interest for the analysis.
+#' @param cohort *tabular input* || **required**
 #'
-#'                    *vector* | for analyses where `time = TRUE`, a vector with up to 5 source **OR** cdm codes of interest for the analysis.
-#' @param omop_or_pcornet *string* | Option to run the function using the OMOP or PCORnet CDM as the default CDM
-#' @param domain_tbl *tabular input* | a csv file that defines the domains where facts should be identified. defaults to the provided
-#'                     `scv_domain_file`, which contains the following fields:
-#' - `domain` | *character* | the CDM table where information for this domain can be found (i.e. drug_exposure)
-#' - `concept_field` | *character* | the column in the CDM table where `cdm` codes can be identified (i.e. drug_concept_id or dx)
-#' - `source_concept_field` | *character* |  the column in the CDM table where `source` codes can be identified (i.e. drug_source_concept_id or raw_dx)
-#' - `date_field` | *character* | the column in the CDM table that should be used as the default date field for
-#' over time analyses (i.e. drug_exposure_start_date or dx_date)
-#' - `vocabulary_field` | *character* | (PCORnet only) The name of the column in the domain table where the vocabulary type is stored
-#' @param code_type *string* | the type of code that is being used in the analysis, either `source` or `cdm`
-#' @param code_domain *string* | the domain where the codes in the concept set should be searched for; must match
-#'                    a domain defined in `domain_tbl`
-#' @param jaccard_index *boolean* | **FOR `scv_ss_anom_cs` ONLY**: a boolean indicating whether a jaccard index
-#'                      should be computed at the visit level to determine how often two mapped concepts
-#'                      cooccur; can help identify potential post-coordination for SNOMED concepts
-#' @param multi_or_single_site *string* | Option to run the function on a single vs multiple sites
-#' - `single` - run the function for a single site
-#' - `multi` - run the function for multiple sites
-#' @param p_value *numeric* | the p value to be used as a threshold in the multi-site anomaly detection analysis
+#'   The cohort to be used for data quality testing. This table should contain,
+#'   at minimum:
+#'   - `site` | *character* | the name(s) of institutions included in your cohort
+#'   - `person_id` / `patid` | *integer* / *character* | the patient identifier
+#'   - `start_date` | *date* | the start of the cohort period
+#'   - `end_date` | *date* | the end of the cohort period
+#'
+#'   Note that the start and end dates included in this table will be used to
+#'   limit the search window for the analyses in this module.
+#'
+#' @param concept_set *tabular input or vector* || **required**
+#'
+#'   For analyses where `time = FALSE`, this input should be a table containing
+#'   the standard CDM concepts **OR** source concepts of interest for the analysis.
+#'   This input should contain at least one of following:
+#'   - `concept_id` | *integer* | the concept_id of interest (required for OMOP)
+#'   - `concept_code` | *character* | the code of interest (required for PCORnet)
+#'
+#'   For certain PCORnet applications, it should also contain
+#'   - `vocabulary_id` | *character* | the vocabulary of the code, which should match what is listed in the domain table's `vocabulary_field`
+#'
+#'
+#'   For analyses where `time = TRUE`, this input should be a vector with up to
+#'   5 standard CDM **OR** source concepts of interest for the analysis. This limitation
+#'   is applied to reduce computational strain. We recommend running a cross-sectional
+#'   analysis first to identify potential concepts of interest, then using these as input
+#'   for the longitudinal analysis.
+#'
+#' @param omop_or_pcornet *string* || **required**
+#'
+#'   A string, either `omop` or `pcornet`, indicating the CDM format of the data
+#'
+#' @param domain_tbl *tabular input* || **required**
+#'
+#'   A table that defines the domains where concepts should be identified. This
+#'   input should contain:
+#'   - `domain` | *character* | the name of the CDM table where the concepts can be identified
+#'   - `concept_field` | *character* | the name of the field in the CDM table where standard `cdm` codes can be identified (i.e. drug_concept_id or dx)
+#'   - `source_concept_field` | *character* |  the name of the field in the CDM table where `source` codes can be identified (i.e. drug_source_concept_id or raw_dx)
+#'   - `date_field` | *character* | the name of the field in the CDM table that should be used for temporal filtering
+#'   - `vocabulary_field` | *character* | for PCORnet applications, the name of the field in the domain table with a vocabulary identifier to differentiate concepts from one another (ex: dx_type); can be set to NA for OMOP applications
+#'
+#'   To see an example of this input, see `?sourceconceptvocabularies::scv_domain_file`
+#'
+#' @param code_type *string* || **required**
+#'
+#'   A string identifying the type of concept that has been provided in the `concept_set`.
+#'
+#'   Acceptable values are `cdm` (the standard, mapped code that is included in the CDM) or `source` (the "raw" concept from the source system)
+#'
+#' @param code_domain *string* || **required**
+#'
+#'   The string name of the domain where the concepts can be identified. This input
+#'   should match at least one of the domains in the `domain_tbl`, and it will function
+#'   to filter this table down to only the relevant domain and allow the user to store
+#'   multiple domains in this table for reuse in other analyses.
+#'
+#' @param jaccard_index *boolean* || defaults to `FALSE`
+#'
+#'   A boolean indicating whether a Jaccard index should be computed at the
+#'   visit level to determine how often two mapped concepts cooccur in the same encounter.
+#'   This computation can help identify potential instances of post-coordination for SNOMED concepts.
+#'
+#'   This is only applicable for the `Single Site, Anomaly Detection, Cross-Sectional` check.
+#'
+#' @param multi_or_single_site *string* || defaults to `single`
+#'
+#'   A string, either `single` or `multi`, indicating whether a single-site or
+#'   multi-site analysis should be executed
+#'
+#' @param p_value *numeric* || defaults to `0.9`
+#'
+#'   The p value to be used as a threshold in the Multi-Site,
+#'   Anomaly Detection, Cross-Sectional analysis
+#'
 #' @param anomaly_or_exploratory *string* | Option to conduct an exploratory or anomaly detection analysis. Exploratory analyses give a high
 #'                               level summary of the data to examine the fact representation within the cohort. Anomaly detection
 #'                               analyses are specialized to identify outliers within the cohort.
-#' @param age_groups *tabular input* | If you would like to stratify the results by age group,  create a table or CSV file with the following
-#'                   columns and include it as the `age_groups` function parameter:
-#' - `min_age` | *integer* |  the minimum age for the group (i.e. 10)
-#' - `max_age` | *integer* |  the maximum age for the group (i.e. 20)
-#' - `group` | *character* |  a string label for the group (i.e. 10-20, Young Adult, etc.)
+#' @param age_groups *tabular input* || defaults to `NULL`
 #'
-#' If you would *not* like to stratify by age group, leave the argument as NULL
-#' @param time *boolean* | a logical that tells the function whether you would like to look at the output over time
-#' @param time_span *vector - length 2* | when time = TRUE, this argument defines the start and end dates for the time period of interest. should be
-#'                  formatted as c(start date, end date) in yyyy-mm-dd date format
-#' @param time_period *string* | when time = TRUE, this argument defines the distance between dates within the specified time period. defaults
-#'                    to `year`, but other time periods such as `month` or `week` are also acceptable
+#'   If you would like to stratify the results by age group, create a table or
+#'   CSV file with the following columns and use it as input to this parameter:
 #'
-#' @return a dataframe with counts and proportions for each source -> cdm or cdm -> source mapping
-#'         pair for each of the codes provided in `concept_set` this output should then be used in
-#'         the `scv_output` function to generate an appropriate visualization
+#'   - `min_age` | *integer* | the minimum age for the group (i.e. 10)
+#'   - `max_age` | *integer* | the maximum age for the group (i.e. 20)
+#'   - `group` | *character* | a string label for the group (i.e. 10-20, Young Adult, etc.)
+#'
+#'   If you would *not* like to stratify by age group, leave as `NULL`
+#'
+#' @param time *boolean* || defaults to `FALSE`
+#'
+#'   A boolean to indicate whether to execute a longitudinal analysis
+#'
+#' @param time_span *vector - length 2* || defaults to `c('2012-01-01', '2020-01-01')`
+#'
+#'   A vector indicating the lower and upper bounds of the time series for longitudinal analyses
+#'
+#' @param time_period *string* || defaults to `year`
+#'
+#'   A string indicating the distance between dates within the specified time_span.
+#'   Defaults to `year`, but other time periods such as `month` or `week` are
+#'   also acceptable
+#'
+#' @return This function will return a dataframe summarizing the
+#'         mapping patterns for each concept provided by the user. For a
+#'         more detailed description of output specific to each check type,
+#'         see the PEDSpace metadata repository
 #'
 #' @import dplyr
 #' @import argos

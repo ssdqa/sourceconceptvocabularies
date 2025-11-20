@@ -6,12 +6,11 @@ source(system.file('setup.R', package = 'sourceconceptvocabularies'))
 conn <- mk_testdb_omop()
 
 #' Establish connection to database and generate internal configurations
-initialize_dq_session(session_name = 'csv_process_test',
-                      working_directory = getwd(),
+initialize_dq_session(session_name = 'scv_process_test',
+                      working_directory = my_directory,
                       db_conn = conn,
                       is_json = FALSE,
-                      file_subdirectory = system.file('extdata',
-                                        package = 'sourceconceptvocabularies'),
+                      file_subdirectory = my_file_folder,
                       cdm_schema = NA)
 
 #' Build mock study cohort
@@ -43,16 +42,18 @@ scv_process_example <- scv_process(cohort = cohort,
                                    code_type = 'cdm',
                                    code_domain = 'condition_occurrence',
                                    domain_tbl = scv_domain_tbl,
-                                   concept_set = scv_concept_set)
+                                   concept_set = scv_concept_set) %>%
+  suppressMessages()
 
 scv_process_example
 
 #' Execute `scv_output` function
 scv_output_example <- scv_output(process_output = scv_process_example,
                                  code_type = 'cdm',
-                                 vocab_tbl = NULL)
+                                 vocab_tbl = NULL) %>%
+  suppressMessages()
 
-scv_output_example
+scv_output_example[[1]]
 
 #' Easily convert the graph into an interactive ggiraph or plotly object with
 #' `make_interactive_squba()`

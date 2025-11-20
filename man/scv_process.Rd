@@ -22,75 +22,125 @@ scv_process(
 )
 }
 \arguments{
-\item{cohort}{\emph{tabular input} | A dataframe with the cohort of patients for your study. Should include the columns:
+\item{cohort}{\emph{tabular input} || \strong{required}
+
+The cohort to be used for data quality testing. This table should contain,
+at minimum:
 \itemize{
-\item \code{person_id} / \code{patid} | \emph{integer} / \emph{character}
-\item \code{start_date} | \emph{date}
-\item \code{end_date} | \emph{date}
-\item \code{site} | \emph{site}
-}}
+\item \code{site} | \emph{character} | the name(s) of institutions included in your cohort
+\item \code{person_id} / \code{patid} | \emph{integer} / \emph{character} | the patient identifier
+\item \code{start_date} | \emph{date} | the start of the cohort period
+\item \code{end_date} | \emph{date} | the end of the cohort period
+}
 
-\item{concept_set}{\emph{tabular input} | for analyses where \code{time = FALSE}, a csv file with the source \strong{OR} cdm codes of interest for the analysis.
+Note that the start and end dates included in this table will be used to
+limit the search window for the analyses in this module.}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{               *vector* | for analyses where `time = TRUE`, a vector with up to 5 source **OR** cdm codes of interest for the analysis.
-}\if{html}{\out{</div>}}}
+\item{concept_set}{\emph{tabular input or vector} || \strong{required}
 
-\item{omop_or_pcornet}{\emph{string} | Option to run the function using the OMOP or PCORnet CDM as the default CDM}
-
-\item{domain_tbl}{\emph{tabular input} | a csv file that defines the domains where facts should be identified. defaults to the provided
-\code{scv_domain_file}, which contains the following fields:
+For analyses where \code{time = FALSE}, this input should be a table containing
+the standard CDM concepts \strong{OR} source concepts of interest for the analysis.
+This input should contain at least one of following:
 \itemize{
-\item \code{domain} | \emph{character} | the CDM table where information for this domain can be found (i.e. drug_exposure)
-\item \code{concept_field} | \emph{character} | the column in the CDM table where \code{cdm} codes can be identified (i.e. drug_concept_id or dx)
-\item \code{source_concept_field} | \emph{character} |  the column in the CDM table where \code{source} codes can be identified (i.e. drug_source_concept_id or raw_dx)
-\item \code{date_field} | \emph{character} | the column in the CDM table that should be used as the default date field for
-over time analyses (i.e. drug_exposure_start_date or dx_date)
-\item \code{vocabulary_field} | \emph{character} | (PCORnet only) The name of the column in the domain table where the vocabulary type is stored
-}}
+\item \code{concept_id} | \emph{integer} | the concept_id of interest (required for OMOP)
+\item \code{concept_code} | \emph{character} | the code of interest (required for PCORnet)
+}
 
-\item{code_type}{\emph{string} | the type of code that is being used in the analysis, either \code{source} or \code{cdm}}
-
-\item{code_domain}{\emph{string} | the domain where the codes in the concept set should be searched for; must match
-a domain defined in \code{domain_tbl}}
-
-\item{jaccard_index}{\emph{boolean} | \strong{FOR \code{scv_ss_anom_cs} ONLY}: a boolean indicating whether a jaccard index
-should be computed at the visit level to determine how often two mapped concepts
-cooccur; can help identify potential post-coordination for SNOMED concepts}
-
-\item{multi_or_single_site}{\emph{string} | Option to run the function on a single vs multiple sites
+For certain PCORnet applications, it should also contain
 \itemize{
-\item \code{single} - run the function for a single site
-\item \code{multi} - run the function for multiple sites
-}}
+\item \code{vocabulary_id} | \emph{character} | the vocabulary of the code, which should match what is listed in the domain table's \code{vocabulary_field}
+}
+
+For analyses where \code{time = TRUE}, this input should be a vector with up to
+5 standard CDM \strong{OR} source concepts of interest for the analysis. This limitation
+is applied to reduce computational strain. We recommend running a cross-sectional
+analysis first to identify potential concepts of interest, then using these as input
+for the longitudinal analysis.}
+
+\item{omop_or_pcornet}{\emph{string} || \strong{required}
+
+A string, either \code{omop} or \code{pcornet}, indicating the CDM format of the data}
+
+\item{domain_tbl}{\emph{tabular input} || \strong{required}
+
+A table that defines the domains where concepts should be identified. This
+input should contain:
+\itemize{
+\item \code{domain} | \emph{character} | the name of the CDM table where the concepts can be identified
+\item \code{concept_field} | \emph{character} | the name of the field in the CDM table where standard \code{cdm} codes can be identified (i.e. drug_concept_id or dx)
+\item \code{source_concept_field} | \emph{character} |  the name of the field in the CDM table where \code{source} codes can be identified (i.e. drug_source_concept_id or raw_dx)
+\item \code{date_field} | \emph{character} | the name of the field in the CDM table that should be used for temporal filtering
+\item \code{vocabulary_field} | \emph{character} | for PCORnet applications, the name of the field in the domain table with a vocabulary identifier to differentiate concepts from one another (ex: dx_type); can be set to NA for OMOP applications
+}
+
+To see an example of this input, see \code{?sourceconceptvocabularies::scv_domain_file}}
+
+\item{code_type}{\emph{string} || \strong{required}
+
+A string identifying the type of concept that has been provided in the \code{concept_set}.
+
+Acceptable values are \code{cdm} (the standard, mapped code that is included in the CDM) or \code{source} (the "raw" concept from the source system)}
+
+\item{code_domain}{\emph{string} || \strong{required}
+
+The string name of the domain where the concepts can be identified. This input
+should match at least one of the domains in the \code{domain_tbl}, and it will function
+to filter this table down to only the relevant domain and allow the user to store
+multiple domains in this table for reuse in other analyses.}
+
+\item{jaccard_index}{\emph{boolean} || defaults to \code{FALSE}
+
+A boolean indicating whether a Jaccard index should be computed at the
+visit level to determine how often two mapped concepts cooccur in the same encounter.
+This computation can help identify potential instances of post-coordination for SNOMED concepts.
+
+This is only applicable for the \verb{Single Site, Anomaly Detection, Cross-Sectional} check.}
+
+\item{multi_or_single_site}{\emph{string} || defaults to \code{single}
+
+A string, either \code{single} or \code{multi}, indicating whether a single-site or
+multi-site analysis should be executed}
 
 \item{anomaly_or_exploratory}{\emph{string} | Option to conduct an exploratory or anomaly detection analysis. Exploratory analyses give a high
 level summary of the data to examine the fact representation within the cohort. Anomaly detection
 analyses are specialized to identify outliers within the cohort.}
 
-\item{p_value}{\emph{numeric} | the p value to be used as a threshold in the multi-site anomaly detection analysis}
+\item{p_value}{\emph{numeric} || defaults to \code{0.9}
 
-\item{age_groups}{\emph{tabular input} | If you would like to stratify the results by age group,  create a table or CSV file with the following
-columns and include it as the \code{age_groups} function parameter:
+The p value to be used as a threshold in the Multi-Site,
+Anomaly Detection, Cross-Sectional analysis}
+
+\item{age_groups}{\emph{tabular input} || defaults to \code{NULL}
+
+If you would like to stratify the results by age group, create a table or
+CSV file with the following columns and use it as input to this parameter:
 \itemize{
-\item \code{min_age} | \emph{integer} |  the minimum age for the group (i.e. 10)
-\item \code{max_age} | \emph{integer} |  the maximum age for the group (i.e. 20)
-\item \code{group} | \emph{character} |  a string label for the group (i.e. 10-20, Young Adult, etc.)
+\item \code{min_age} | \emph{integer} | the minimum age for the group (i.e. 10)
+\item \code{max_age} | \emph{integer} | the maximum age for the group (i.e. 20)
+\item \code{group} | \emph{character} | a string label for the group (i.e. 10-20, Young Adult, etc.)
 }
 
-If you would \emph{not} like to stratify by age group, leave the argument as NULL}
+If you would \emph{not} like to stratify by age group, leave as \code{NULL}}
 
-\item{time}{\emph{boolean} | a logical that tells the function whether you would like to look at the output over time}
+\item{time}{\emph{boolean} || defaults to \code{FALSE}
 
-\item{time_span}{\emph{vector - length 2} | when time = TRUE, this argument defines the start and end dates for the time period of interest. should be
-formatted as c(start date, end date) in yyyy-mm-dd date format}
+A boolean to indicate whether to execute a longitudinal analysis}
 
-\item{time_period}{\emph{string} | when time = TRUE, this argument defines the distance between dates within the specified time period. defaults
-to \code{year}, but other time periods such as \code{month} or \code{week} are also acceptable}
+\item{time_span}{\emph{vector - length 2} || defaults to \code{c('2012-01-01', '2020-01-01')}
+
+A vector indicating the lower and upper bounds of the time series for longitudinal analyses}
+
+\item{time_period}{\emph{string} || defaults to \code{year}
+
+A string indicating the distance between dates within the specified time_span.
+Defaults to \code{year}, but other time periods such as \code{month} or \code{week} are
+also acceptable}
 }
 \value{
-a dataframe with counts and proportions for each source -> cdm or cdm -> source mapping
-pair for each of the codes provided in \code{concept_set} this output should then be used in
-the \code{scv_output} function to generate an appropriate visualization
+This function will return a dataframe summarizing the
+mapping patterns for each concept provided by the user. For a
+more detailed description of output specific to each check type,
+see the PEDSpace metadata repository
 }
 \description{
 This is a concept-set testing module that will compute frequency distributions for the usage of either
@@ -110,12 +160,11 @@ source(system.file('setup.R', package = 'sourceconceptvocabularies'))
 conn <- mk_testdb_omop()
 
 #' Establish connection to database and generate internal configurations
-initialize_dq_session(session_name = 'csv_process_test',
-                      working_directory = getwd(),
+initialize_dq_session(session_name = 'scv_process_test',
+                      working_directory = my_directory,
                       db_conn = conn,
                       is_json = FALSE,
-                      file_subdirectory = system.file('extdata',
-                                        package = 'sourceconceptvocabularies'),
+                      file_subdirectory = my_file_folder,
                       cdm_schema = NA)
 
 #' Build mock study cohort
@@ -147,16 +196,18 @@ scv_process_example <- scv_process(cohort = cohort,
                                    code_type = 'cdm',
                                    code_domain = 'condition_occurrence',
                                    domain_tbl = scv_domain_tbl,
-                                   concept_set = scv_concept_set)
+                                   concept_set = scv_concept_set) \%>\%
+  suppressMessages()
 
 scv_process_example
 
 #' Execute `scv_output` function
 scv_output_example <- scv_output(process_output = scv_process_example,
                                  code_type = 'cdm',
-                                 vocab_tbl = NULL)
+                                 vocab_tbl = NULL) \%>\%
+  suppressMessages()
 
-scv_output_example
+scv_output_example[[1]]
 
 #' Easily convert the graph into an interactive ggiraph or plotly object with
 #' `make_interactive_squba()`

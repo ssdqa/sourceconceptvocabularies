@@ -17,44 +17,85 @@ scv_output(
 )
 }
 \arguments{
-\item{process_output}{\emph{tabular input} | the output of the \code{scv_process} function}
+\item{process_output}{\emph{tabular input} || \strong{required}
 
-\item{code_type}{\emph{string} | the type of code that is being used in the analysis, either \code{source} or \code{cdm};
-should match the code_type that was defined when running \code{scv_process}}
+The tabular output produced by \code{scv_process}}
 
-\item{filter_concept}{\emph{(integer or string) or vector} | choose concept from the concept_set provided in
-\code{scv_process} to filter the output; used for all inputs EXCEPT \code{ss_exp_cs}, \code{ss_exp_la},
-and \code{ss_anom_cs} (when jaccard_index is FALSE)}
+\item{code_type}{\emph{string} || \strong{required}
 
-\item{filter_mapped}{\emph{(integer or string) or vector} | choose mapped concept from those associated with the
-concept_id provided in \code{filter_concept}; options can be found in the \code{source_concept_id} column
-of \code{scv_process}; used for \code{ms_anom_la}}
+A string identifying the type of concept that was been provided in the \code{concept_set}. This
+should match whatever was provided when executing the \code{scv_process} function.
 
-\item{num_codes}{\emph{integer} | the number of top codes of code_type that should be displayed in the analysis
+Acceptable values are \code{cdm} (the standard, mapped code that is included in the CDM) or \code{source} (the "raw" concept from the source system)}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{             used for `ss_exp_cs` and `ss_anom_cs`
-}\if{html}{\out{</div>}}}
+\item{filter_concept}{\emph{(integer or string) or vector} || defaults to \code{NULL}
 
-\item{num_mappings}{\emph{integer} | the number of top mappings that should be displayed for each code of code_type
+An integer/string (depending on the data model) or vector of concepts (as provided in the \code{concept_set} in \code{scv_process})
+that should appear in the output. This parameter is required for the following check types:
+\itemize{
+\item \verb{Single Site, Anomaly Detection, Cross-Sectional}
+\item \verb{Multi-Site, Anomaly Detection, Cross-Sectional}
+\item \verb{Multi-Site, Exploratory, Longitudinal}
+\item \verb{Single Site, Anomaly Detection, Longitudinal}
+\item \verb{Multi-Site, Anomaly Detection, Longitudinal}
+}}
 
-\if{html}{\out{<div class="sourceCode">}}\preformatted{                used for `ss_exp_cs`, `ss_exp_la`, `ms_exp_la`, `ss_anom_cs`, `ms_anom_cs`
-}\if{html}{\out{</div>}}}
+\item{filter_mapped}{\emph{integer or string} || defaults to \code{NULL}
 
-\item{vocab_tbl}{\emph{tabular input} | OPTIONAL: the location of an external vocabulary table containing concept names for
-the provided codes. if not NULL, concept names will be available in either a reference
-table or in a hover tooltip}
+An integer/string (depending on the data model) representing a mapping associated with \code{filter_concept},
+as it appears in the output. This parameter is required for the following check types:
+\itemize{
+\item \verb{Multi-Site, Anomaly Detection, Longitudinal}
+}}
 
-\item{large_n}{\emph{boolean} | for multi-site analyses, a boolean indicating whether the large N visualization, intended for a high
-volume of sites, should be used; defaults to FALSE}
+\item{num_codes}{\emph{integer} || defaults to \code{10}
 
-\item{large_n_sites}{\emph{vector} | when large_n is TRUE, a vector of site names that can optionally generate a filtered visualization}
+An integer indicating the top N of concepts (of \code{code_type}) that should be
+displayed in the plot. This parameter is required for the following check types:
+\itemize{
+\item \verb{Single Site, Exploratory, Cross-Sectional}
+\item \verb{Multi-Site, Exploratory, Cross-Sectional}
+\item \verb{Single Site, Anomaly Detection, Cross-Sectional}
+}}
+
+\item{num_mappings}{\emph{integer} || defaults to \code{25}
+
+An integer indicating the top N of mappings associated with each concept of \code{code_type}
+that should be displayed on the plot. This parameter is required for the following
+check types:
+\itemize{
+\item \verb{Single Site, Exploratory, Cross-Sectional}
+\item \verb{Single Site, Anomaly Detection, Cross-Sectional}
+\item \verb{Multi-Site, Anomaly Detection, Cross-Sectional}
+\item \verb{Single Site, Exploratory, Longitudinal}
+\item \verb{Multi-Site, Exploratory, Longitudinal}
+\item \verb{Multi-Site, Anomaly Detection, Longitudinal}
+}}
+
+\item{vocab_tbl}{\emph{tabular input} || \strong{optional}
+
+A vocabulary table containing concept names for the provided codes
+(ex: the OMOP concept table)}
+
+\item{large_n}{\emph{boolean} || defaults to \code{FALSE}
+
+For Multi-Site analyses, a boolean indicating whether the large N
+visualization, intended for a high volume of sites, should be used. This
+visualization will produce high level summaries across all sites, with an
+option to add specific site comparators via the \code{large_n_sites} parameter.}
+
+\item{large_n_sites}{\emph{vector} || defaults to \code{NULL}
+
+When \code{large_n = TRUE}, a vector of site names that can add site-level information
+to the plot for comparison across the high level summary information.}
 }
 \value{
-a graph to visualize the results from \code{scv_process} based on the parameters provided
-
-\if{html}{\out{<div class="sourceCode">}}\preformatted{    in some cases, an additional reference table with summary information about the codes
-    included in the graph
-}\if{html}{\out{</div>}}
+This function will produce a graph to visualize the results
+from \code{scv_process} based on the parameters provided. The default
+output is typically a static ggplot or gt object, but interactive
+elements can be activated by passing the plot through \code{make_interactive_squba}.
+For a more detailed description of output specific to each check type,
+see the PEDSpace metadata repository
 }
 \description{
 Using the tabular output generated by \code{scv_process}, this function will build a graph to
@@ -71,12 +112,11 @@ source(system.file('setup.R', package = 'sourceconceptvocabularies'))
 conn <- mk_testdb_omop()
 
 #' Establish connection to database and generate internal configurations
-initialize_dq_session(session_name = 'csv_process_test',
-                      working_directory = getwd(),
+initialize_dq_session(session_name = 'scv_process_test',
+                      working_directory = my_directory,
                       db_conn = conn,
                       is_json = FALSE,
-                      file_subdirectory = system.file('extdata',
-                                        package = 'sourceconceptvocabularies'),
+                      file_subdirectory = my_file_folder,
                       cdm_schema = NA)
 
 #' Build mock study cohort
@@ -108,16 +148,18 @@ scv_process_example <- scv_process(cohort = cohort,
                                    code_type = 'cdm',
                                    code_domain = 'condition_occurrence',
                                    domain_tbl = scv_domain_tbl,
-                                   concept_set = scv_concept_set)
+                                   concept_set = scv_concept_set) \%>\%
+  suppressMessages()
 
 scv_process_example
 
 #' Execute `scv_output` function
 scv_output_example <- scv_output(process_output = scv_process_example,
                                  code_type = 'cdm',
-                                 vocab_tbl = NULL)
+                                 vocab_tbl = NULL) \%>\%
+  suppressMessages()
 
-scv_output_example
+scv_output_example[[1]]
 
 #' Easily convert the graph into an interactive ggiraph or plotly object with
 #' `make_interactive_squba()`

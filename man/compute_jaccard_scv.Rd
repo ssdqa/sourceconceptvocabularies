@@ -41,3 +41,4 @@ This function will compute the Jaccard similarity index
 at the visit level to determine how often two mappings occur
 within the same visit when mapped to/from a given concept
 }
+\keyword{internal}

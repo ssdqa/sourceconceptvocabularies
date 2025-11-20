@@ -37,3 +37,4 @@ mean proportion for the code type along the x axis
 \description{
 \emph{Single Site, Anomaly, Cross-Sectional}
 }
+\keyword{internal}

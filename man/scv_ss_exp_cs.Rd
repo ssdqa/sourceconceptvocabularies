@@ -26,7 +26,7 @@ should match the code_type provided when running \code{scv_process}}
 }
 \value{
 a heatmap with one facet per code and additional facet groupings, limited to the number
-of codes selected with @num_codes
+of codes selected with num_codes
 mapped code along the y-axis and proportion of representation as the fill
 
 a reference table with additional information about the codes used as the facet.
@@ -36,3 +36,4 @@ if @vocab_tbl is not NULL
 \description{
 \emph{Single Site, Exploratory, Cross-Sectional}
 }
+\keyword{internal}

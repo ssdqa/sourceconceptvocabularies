@@ -31,9 +31,10 @@ volume of sites, should be used; defaults to FALSE}
 \value{
 a searchable and filterable table with mappings, proportion of representation, and
 denominator counts for the number of codes selected
-in @num_codes
-concept name will be included if @vocab_tbl is not NULL
+in num_codes
+concept name will be included if vocab_tbl is not NULL
 }
 \description{
 \emph{Multi Site, Exploratory, Cross-Sectional}
 }
+\keyword{internal}

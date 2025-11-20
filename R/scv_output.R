@@ -6,32 +6,76 @@
 #' be adjusted by the user after the graph has been output using `+ theme()`. Most graphs can
 #' also be made interactive using `make_interactive_squba()`
 #'
-#' @param process_output *tabular input* | the output of the `scv_process` function
-#' @param code_type *string* | the type of code that is being used in the analysis, either `source` or `cdm`;
-#'                  should match the code_type that was defined when running `scv_process`
-#' @param filter_concept *(integer or string) or vector* | choose concept from the concept_set provided in
-#'                       `scv_process` to filter the output; used for all inputs EXCEPT `ss_exp_cs`, `ss_exp_la`,
-#'                       and `ss_anom_cs` (when jaccard_index is FALSE)
-#' @param filter_mapped *(integer or string) or vector* | choose mapped concept from those associated with the
-#'                      concept_id provided in `filter_concept`; options can be found in the `source_concept_id` column
-#'                      of `scv_process`; used for `ms_anom_la`
-#' @param num_codes *integer* | the number of top codes of code_type that should be displayed in the analysis
+#' @param process_output *tabular input* || **required**
 #'
-#'                  used for `ss_exp_cs` and `ss_anom_cs`
-#' @param num_mappings *integer* | the number of top mappings that should be displayed for each code of code_type
+#'   The tabular output produced by `scv_process`
 #'
-#'                     used for `ss_exp_cs`, `ss_exp_la`, `ms_exp_la`, `ss_anom_cs`, `ms_anom_cs`
-#' @param vocab_tbl *tabular input* | OPTIONAL: the location of an external vocabulary table containing concept names for
-#'                  the provided codes. if not NULL, concept names will be available in either a reference
-#'                  table or in a hover tooltip
-#' @param large_n *boolean* | for multi-site analyses, a boolean indicating whether the large N visualization, intended for a high
-#'                volume of sites, should be used; defaults to FALSE
-#' @param large_n_sites *vector* | when large_n is TRUE, a vector of site names that can optionally generate a filtered visualization
+#' @param code_type *string* || **required**
 #'
-#' @return a graph to visualize the results from `scv_process` based on the parameters provided
+#'   A string identifying the type of concept that was been provided in the `concept_set`. This
+#'   should match whatever was provided when executing the `scv_process` function.
 #'
-#'         in some cases, an additional reference table with summary information about the codes
-#'         included in the graph
+#'   Acceptable values are `cdm` (the standard, mapped code that is included in the CDM) or `source` (the "raw" concept from the source system)
+#'
+#' @param filter_concept *(integer or string) or vector* || defaults to `NULL`
+#'
+#'   An integer/string (depending on the data model) or vector of concepts (as provided in the `concept_set` in `scv_process`)
+#'   that should appear in the output. This parameter is required for the following check types:
+#'   - `Single Site, Anomaly Detection, Cross-Sectional`
+#'   - `Multi-Site, Anomaly Detection, Cross-Sectional`
+#'   - `Multi-Site, Exploratory, Longitudinal`
+#'   - `Single Site, Anomaly Detection, Longitudinal`
+#'   - `Multi-Site, Anomaly Detection, Longitudinal`
+#'
+#' @param filter_mapped *integer or string* || defaults to `NULL`
+#'
+#'   An integer/string (depending on the data model) representing a mapping associated with `filter_concept`,
+#'   as it appears in the output. This parameter is required for the following check types:
+#'   - `Multi-Site, Anomaly Detection, Longitudinal`
+#'
+#' @param num_codes *integer* || defaults to `10`
+#'
+#'   An integer indicating the top N of concepts (of `code_type`) that should be
+#'   displayed in the plot. This parameter is required for the following check types:
+#'   - `Single Site, Exploratory, Cross-Sectional`
+#'   - `Multi-Site, Exploratory, Cross-Sectional`
+#'   - `Single Site, Anomaly Detection, Cross-Sectional`
+#'
+#' @param num_mappings *integer* || defaults to `25`
+#'
+#'   An integer indicating the top N of mappings associated with each concept of `code_type`
+#'   that should be displayed on the plot. This parameter is required for the following
+#'   check types:
+#'   - `Single Site, Exploratory, Cross-Sectional`
+#'   - `Single Site, Anomaly Detection, Cross-Sectional`
+#'   - `Multi-Site, Anomaly Detection, Cross-Sectional`
+#'   - `Single Site, Exploratory, Longitudinal`
+#'   - `Multi-Site, Exploratory, Longitudinal`
+#'   - `Multi-Site, Anomaly Detection, Longitudinal`
+#'
+#' @param vocab_tbl *tabular input* || **optional**
+#'
+#'   A vocabulary table containing concept names for the provided codes
+#'   (ex: the OMOP concept table)
+#'
+#' @param large_n *boolean* || defaults to `FALSE`
+#'
+#'   For Multi-Site analyses, a boolean indicating whether the large N
+#'   visualization, intended for a high volume of sites, should be used. This
+#'   visualization will produce high level summaries across all sites, with an
+#'   option to add specific site comparators via the `large_n_sites` parameter.
+#'
+#' @param large_n_sites *vector* || defaults to `NULL`
+#'
+#'   When `large_n = TRUE`, a vector of site names that can add site-level information
+#'   to the plot for comparison across the high level summary information.
+#'
+#' @return This function will produce a graph to visualize the results
+#'         from `scv_process` based on the parameters provided. The default
+#'         output is typically a static ggplot or gt object, but interactive
+#'         elements can be activated by passing the plot through `make_interactive_squba`.
+#'         For a more detailed description of output specific to each check type,
+#'         see the PEDSpace metadata repository
 #'
 #' @example inst/example-scv_process_output.R
 #'
