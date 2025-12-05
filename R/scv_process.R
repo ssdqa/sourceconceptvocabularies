@@ -177,7 +177,7 @@ scv_process <- function(cohort,
 
   # Prep cohort
     cohort_prep <- prepare_cohort(cohort_tbl = cohort_filter,
-                                  age_groups = age_groups, codeset = NULL,
+                                  age_groups = age_groups,
                                   omop_or_pcornet = omop_or_pcornet) %>%
       mutate(domain = code_domain) %>%
       group_by(!!! syms(grouped_list))
